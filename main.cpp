@@ -17,10 +17,10 @@
 #include <omp.h>
 
 #define DEBUG 1
-#define SAVE_SPACE 1 
+#define SAVE_SPACE 0 
 
 //output format [row, column]
-#define RESULT 0 // 0 = [prefix, suffix], 1 = [suffix, prefix]
+#define RESULT 1 // 0 = [prefix, suffix], 1 = [suffix, prefix]
 
 using namespace std;
 using namespace sdsl;
@@ -224,7 +224,7 @@ int main(int argc, char *argv[]){
 	uint32_t *Min_lcp = (uint32_t*) malloc(k*sizeof(uint32_t));
 
 
-//	#pragma omp parallel for reduction(+:inserts)
+	#pragma omp parallel for reduction(+:inserts)
 	for(int32_t p = k-1; p >= 0; p--){
 	
 //		printf("### [%d] = %d ###\n", omp_get_thread_num(), p);
@@ -263,16 +263,19 @@ int main(int argc, char *argv[]){
 
 
 	//GLOBAL solution (reusing)
+	uint32_t t,p,prefix, min_lcp;
 	
-//	#pragma omp parallel for //reduction(+:removes) default(shared) 
-	for(uint32_t t = 0; t < k; ++t){
+	#pragma omp parallel default(shared) firstprivate(Lglobal, Prefix, Min_lcp)  private(t, p, prefix, min_lcp) //reduction(+:removes) 
+	{
+	#pragma omp for nowait //schedule(static) 
+	for(t = 0; t < k; ++t){
 //		printf("### [%d] = %d ###\n", omp_get_thread_num(), t);
 
-		for(uint32_t p = 0; p < k; ++p){
+		for(p = 0; p < k; ++p){
 
 //		uint32_t prefix = str_int[(sa[block[p]]+m-1)%m];
-			uint32_t prefix = Prefix[p];
-			uint32_t min_lcp = Min_lcp[p];
+			prefix = Prefix[p];
+			min_lcp = Min_lcp[p];
 			
 //			while(Lg[t]->value > min_lcp){
 //                		remove(Lg, t);
@@ -290,7 +293,7 @@ int main(int argc, char *argv[]){
 //			prepend(Lg, Ll, next, t, sentinel);
 //FELIPE
 			prepend(Lglobal, t, Llocal[t], Next[t], p);
-           
+ 
             		if(t!=prefix)
             		#if SAVE_SPACE
 				if(Lglobal[t]->value)
@@ -301,9 +304,10 @@ int main(int argc, char *argv[]){
 				#else
 					result[prefix][t] = Lglobal[t]->value;
 				#endif
-
 		}
 	}
+	}
+
 
 	cout<<"--"<<endl;
 	printf("CLOCK = %lf TIME = %lf (in seconds)\n", (clock() - c_start) / (double)(CLOCKS_PER_SEC), difftime (time(NULL),t_start));

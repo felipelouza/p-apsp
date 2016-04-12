@@ -17,7 +17,7 @@
 #include <omp.h>
 
 #define DEBUG 1
-#define SAVE_SPACE 1 
+#define SAVE_SPACE 0 
 
 using namespace std;
 using namespace sdsl;
