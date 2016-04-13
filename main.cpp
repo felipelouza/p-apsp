@@ -38,8 +38,8 @@ typedef vector<tMII> tVMII;
 
 inline int top(Tl **list, int n);
 inline void insert(Tl ***next, int n, int value, Tl *sentinel);
-inline void remove(Tl **list, int n);
-inline void prepend(Tl **list1, int t, Tl **list2, Tl***next, int n);
+inline void remove(Tl **list);
+inline void prepend(Tl **list1, Tl **list2, Tl***next, int n);
 
 int main(int argc, char *argv[]){
 
@@ -67,7 +67,12 @@ int main(int argc, char *argv[]){
 
 	omp_set_num_threads(n_threads);
 
-	printf("N_THREADS: %d\n", n_threads);
+	#pragma omp parallel
+	{
+	if(omp_get_thread_num()==0)
+		printf("N_THREADS: %d\n", omp_get_num_threads());
+	}
+
 	printf("N_PROCS: %d\n", omp_get_num_procs());
 
 	while(f_input.getline(buf, buflen-1) ){
@@ -163,6 +168,7 @@ int main(int argc, char *argv[]){
 
 	Tl *sentinel = (Tl *) malloc(sizeof(Tl));
 	sentinel->value = 0;
+	sentinel->prox = NULL;
 
 //FELIPE
 //	Tl *Llocal[k][k];
@@ -196,9 +202,9 @@ int main(int argc, char *argv[]){
 //		Lg[i] = sentinel;
 //		Ll[i] = sentinel;
 //		next[i] = Ll+i;
+		Lglobal[i] = sentinel;
 
 		for(uint32_t j = 0; j < k; j++){
-			Lglobal[i] = sentinel;
 			Llocal[i][j] =  sentinel;
 			Next[i][j] = &Llocal[i][j];
 		}
@@ -224,7 +230,8 @@ int main(int argc, char *argv[]){
 	uint32_t *Min_lcp = (uint32_t*) malloc(k*sizeof(uint32_t));
 
 
-	#pragma omp parallel for reduction(+:inserts)
+	#pragma omp parallel 
+	#pragma omp for //reduction(+:inserts)
 	for(int32_t p = k-1; p >= 0; p--){
 	
 //		printf("### [%d] = %d ###\n", omp_get_thread_num(), p);
@@ -260,54 +267,56 @@ int main(int argc, char *argv[]){
 	t_start = time(NULL);
 	c_start = clock();
 
-
-
 	//GLOBAL solution (reusing)
-	uint32_t t,p,prefix, min_lcp;
 	
-	#pragma omp parallel default(shared) firstprivate(Lglobal, Prefix, Min_lcp)  private(t, p, prefix, min_lcp) //reduction(+:removes) 
+	#pragma omp parallel //reduction(+:removes)
 	{
-	#pragma omp for nowait //schedule(static) 
-	for(t = 0; t < k; ++t){
-//		printf("### [%d] = %d ###\n", omp_get_thread_num(), t);
-
-		for(p = 0; p < k; ++p){
-
-//		uint32_t prefix = str_int[(sa[block[p]]+m-1)%m];
-			prefix = Prefix[p];
-			min_lcp = Min_lcp[p];
-			
-//			while(Lg[t]->value > min_lcp){
-//                		remove(Lg, t);
-		
-//			cout<<"p = "<<p<<", "<<Min_lcp[p]<<"\t"<<Lglobal[t]->value<<endl;
-
 	
-			while(Lglobal[t]->value > min_lcp){
-			
-//				cout<<"opa = "<<p<<", "<<Min_lcp[p]<<endl;
-                		remove(Lglobal, t);
-                		removes++;
-            		}
+		if(omp_get_thread_num()==0)
+			printf("N_THREADS: %d\n", omp_get_num_threads());
+	
+		#pragma omp for //nowait 
+		for(uint32_t t = 0; t < k; t++){
 
-//			prepend(Lg, Ll, next, t, sentinel);
-//FELIPE
-			prepend(Lglobal, t, Llocal[t], Next[t], p);
- 
-            		if(t!=prefix)
-            		#if SAVE_SPACE
-				if(Lglobal[t]->value)
-            		#endif
-//				if(!result[prefix][t])
-				#if RESULT
-					result[t][prefix] = Lglobal[t]->value;
-				#else
-					result[prefix][t] = Lglobal[t]->value;
-				#endif
+	//	printf("### [%d] = %d ###\n", omp_get_thread_num(), t);
+		
+			uint32_t min_lcp;
+			Tl *Lg = sentinel;
+
+			for(uint32_t p = 0; p < k; ++p){
+		
+	//			uint32_t prefix = str_int[(sa[block[p]]+m-1)%m];
+				min_lcp = Min_lcp[p];
+				while(Lg->value > min_lcp){
+		        		remove(&Lg);
+	//		       		removes++;
+		        	}
+		
+				prepend(&Lg, Llocal[t], Next[t], p);
+
+				Llocal[t][p]->value = Lg->value;
+
+				//uint32_t prefix = Prefix[p];
+			}
+		}
+
+		#pragma omp for //nowait 
+		for(uint32_t t = 0; t < k; t++){
+
+			for(uint32_t p = 0; p < k; ++p){
+
+		        	#if SAVE_SPACE
+					if(Llocal[t][p]->value)
+		        	#endif
+		        		if(t!=Prefix[p])
+					#if RESULT
+						result[t][Prefix[p]] = Llocal[t][p]->value;
+					#else
+						result[Prefix[p]][t] = Llocal[t][p]->value;
+					#endif
+			}
 		}
 	}
-	}
-
 
 	cout<<"--"<<endl;
 	printf("CLOCK = %lf TIME = %lf (in seconds)\n", (clock() - c_start) / (double)(CLOCKS_PER_SEC), difftime (time(NULL),t_start));
@@ -432,18 +441,18 @@ inline void insert(Tl ***next, int n, int value, Tl *sentinel){
     next[n] = &(aux->prox);
 }    
     
-inline void remove(Tl **list, int n){
+inline void remove(Tl **list){
     
     Tl *aux;
-    aux = list[n];
-    list[n] = list[n]->prox;
+    aux = *list;
+    *list = (*list)->prox;
     free(aux);
 }
 
-inline void prepend(Tl **list1, int t, Tl **list2, Tl***next, int n){
+inline void prepend(Tl **list1, Tl **list2, Tl***next, int n){
 
-    *(next[n]) = list1[t];
-    list1[t] = list2[n];
+    *(next[n]) = *list1;
+    *list1 = list2[n];
     //list2[n] = sentinel;
     next[n] = list2 + n;
 }
