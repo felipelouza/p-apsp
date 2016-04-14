@@ -41,6 +41,8 @@ inline void insert(Tl ***next, int n, int value);
 inline void remove(Tl **list);
 inline void prepend(Tl **list1, Tl **list2, Tl***next, int n);
 
+double start, total;
+
 int main(int argc, char *argv[]){
 
 	uint32_t k = 0;
@@ -132,19 +134,15 @@ int main(int argc, char *argv[]){
 
 	store_to_cache(str_int, conf::KEY_TEXT_INT, m_config);
 
-/*
 	construct_sa<0>(m_config);
 	construct_lcp_PHI<0>(m_config);
 	cout<<"constructed enhanced suffix array"<<endl;
-*/
+
 	int_vector<> sa;
 	int_vector<> lcp;
 
 	load_from_cache(sa, conf::KEY_SA, m_config);
 	load_from_cache(lcp, conf::KEY_LCP, m_config);
-
-//FELIPE
-	/**/
 
 
     	uint32_t *block = (uint32_t *) malloc(k * sizeof(uint32_t));
@@ -162,22 +160,7 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-
-//	Tl ***next = (Tl ***) malloc(k * sizeof(Tl**));
-//	Tl **Ll = (Tl **)  malloc(k * sizeof(Tl*));
-//	Tl **Lg = (Tl **)  malloc(k * sizeof(Tl*));
-
-	Tl *sentinel = (Tl *) malloc(sizeof(Tl));
-	sentinel->value = 0;
-	sentinel->prox = NULL;
-
-//FELIPE
-//	Tl *Llocal[k][k];
-//	Tl *Lglobal[k];
-//	Tl **Next[k][k];
-
 	Tl ***Llocal = (Tl ***)  malloc(k * sizeof(Tl**));
-//	Tl **Lglobal = (Tl **)   malloc(k * sizeof(Tl*));
 	Tl ****Next   = (Tl ****)  malloc(k * sizeof(Tl***));
 
 	for(uint32_t i = 0; i < k; i++){
@@ -200,11 +183,6 @@ int main(int argc, char *argv[]){
 
 	for(uint32_t i = 0; i < k; i++){
 
-//		Lg[i] = sentinel;
-//		Ll[i] = sentinel;
-//		next[i] = Ll+i;
-//		Lglobal[i] = sentinel;
-
 		for(uint32_t j = 0; j < k; j++){
 			Llocal[i][j] = NULL; // sentinel;
 			Next[i][j] = &Llocal[i][j];
@@ -214,25 +192,17 @@ int main(int argc, char *argv[]){
 	
 	cout<<"computing.."<<endl;
 
-	time_t t_total = time(NULL);
-	clock_t c_total = clock();
-
-	//double start = clock();
-	time_t t_start = time(NULL);
-	clock_t c_start = clock();
+	total = omp_get_wtime();
+	start = omp_get_wtime();
 
 	int inserts = 0;
 	int removes = 0;
 
-
-//FELIPE
 	uint32_t *Min_lcp = (uint32_t*) malloc(k*sizeof(uint32_t));
 
 	#pragma omp parallel for //reduction(+:inserts)
 	for(uint32_t p = 0; p < k; p++){
 	
-//		uint32_t prefix = str_int[(sa[block[p]]+m-1)%m];
-//		uint32_t prefix = Prefix[p];
 		uint32_t min_lcp = UINT_MAX;
 
 		//LOCAL solution:
@@ -246,8 +216,7 @@ int main(int argc, char *argv[]){
 
 				if(t < k)//complete overlap
 					if(min_lcp >= threshold){
-//						insert(next, t, lcp[i+1], sentinel); inserts++;
-						insert(Next[t], p, lcp[i+1]); inserts++;
+						insert(Next[t], p, lcp[i+1]); //inserts++;
 					}
         		}
 		}
@@ -255,11 +224,9 @@ int main(int argc, char *argv[]){
 	}
 
 	cout<<"--"<<endl;
-	printf("CLOCK = %lf TIME = %lf (in seconds)\n", (clock() - c_start) / (double)(CLOCKS_PER_SEC), difftime (time(NULL),t_start));
-	cout<<"--"<<endl;
+	printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
 
-	t_start = time(NULL);
-	c_start = clock();
+	start = omp_get_wtime();
 
 	//GLOBAL solution (reusing)
 	
@@ -296,12 +263,10 @@ int main(int argc, char *argv[]){
 	}
 
 	cout<<"--"<<endl;
-	printf("CLOCK = %lf TIME = %lf (in seconds)\n", (clock() - c_start) / (double)(CLOCKS_PER_SEC), difftime (time(NULL),t_start));
-	cout<<"--"<<endl;
+	printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
 
-	t_start = time(NULL);
-	c_start = clock();
-
+	start = omp_get_wtime();
+	
 	//contained suffixes
 	#pragma omp parallel for //firstprivate(threshold,m,k) 
 	for(uint32_t p = 0; p < k; p++){
@@ -326,13 +291,14 @@ int main(int argc, char *argv[]){
 
 	}
 
+	//end = omp_get_wtime();
 	cout<<"--"<<endl;
-	printf("CLOCK = %lf TIME = %lf (in seconds)\n", (clock() - c_start) / (double)(CLOCKS_PER_SEC), difftime (time(NULL),t_start));
-	cout<<"--"<<endl;
+	printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
 
 	cout<<"##"<<endl;
-	printf("CLOCK = %lf TIME = %lf (in seconds)\n", (clock() - c_total) / (double)(CLOCKS_PER_SEC), difftime (time(NULL),t_total));
+	printf("TIME = %f (in seconds)\n", omp_get_wtime()-total);
 	cout<<"##"<<endl;
+
 
    	printf("inserts %i\n", inserts);
 	printf("removes %i\n", removes);
@@ -403,7 +369,6 @@ int main(int argc, char *argv[]){
 //	free(Lg);
 //	free(Ll);
 //	free(next);
-	free(sentinel);
 
 	return 0;
 }
