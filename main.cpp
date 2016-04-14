@@ -1,8 +1,8 @@
 /*
 * Felipe A. Louza
-* 25 fev 2015
+* 06 abr 2016
 *
-* New algorithm to solve the apsp problem
+* New (parallel) algorithm to solve the apsp problem
 */
 
 #include <sdsl/construct.hpp>
@@ -17,10 +17,10 @@
 #include <omp.h>
 
 #define DEBUG 1
-#define SAVE_SPACE 0
+#define SAVE_SPACE 1
 
 //output format [row, column]
-#define RESULT 0 // 0 = [prefix, suffix], 1 = [suffix, prefix]
+#define RESULT 1 // 0 = [prefix, suffix], 1 = [suffix, prefix]
 
 using namespace std;
 using namespace sdsl;
@@ -128,22 +128,34 @@ int main(int argc, char *argv[]){
 	for(uint32_t i=0; i<m; i++)
 		str_int[i] =  str[i];
 
+	string input(argv[1]);
  	string dir = ".";
-    	string id = "tmp";
+    	string id = "tmp."+to_string(k);
     	cache_config m_config(true, dir, id);
 
 	store_to_cache(str_int, conf::KEY_TEXT_INT, m_config);
 
+/*
 	construct_sa<0>(m_config);
 	construct_lcp_PHI<0>(m_config);
 	cout<<"constructed enhanced suffix array"<<endl;
-
+*/
 	int_vector<> sa;
 	int_vector<> lcp;
 
-	load_from_cache(sa, conf::KEY_SA, m_config);
-	load_from_cache(lcp, conf::KEY_LCP, m_config);
+	if(!load_from_cache(sa, conf::KEY_SA, m_config)){
+		start = omp_get_wtime();
+		construct_sa<0>(m_config);
+		load_from_cache(sa, conf::KEY_SA, m_config);
+		printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
+	}
 
+	if(!load_from_cache(lcp, conf::KEY_LCP, m_config)){
+		start = omp_get_wtime();
+		construct_lcp_PHI<0>(m_config);
+		load_from_cache(lcp, conf::KEY_LCP, m_config);
+		printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
+	}
 
     	uint32_t *block = (uint32_t *) malloc(k * sizeof(uint32_t));
     	uint32_t *Prefix = (uint32_t *) malloc(k * sizeof(uint32_t));
@@ -200,7 +212,7 @@ int main(int argc, char *argv[]){
 
 	uint32_t *Min_lcp = (uint32_t*) malloc(k*sizeof(uint32_t));
 
-	#pragma omp parallel for //reduction(+:inserts)
+	#pragma omp parallel for reduction(+:inserts)
 	for(uint32_t p = 0; p < k; p++){
 	
 		uint32_t min_lcp = UINT_MAX;
@@ -216,7 +228,7 @@ int main(int argc, char *argv[]){
 
 				if(t < k)//complete overlap
 					if(min_lcp >= threshold){
-						insert(Next[t], p, lcp[i+1]); //inserts++;
+						insert(Next[t], p, lcp[i+1]); inserts++;
 					}
         		}
 		}
@@ -230,7 +242,7 @@ int main(int argc, char *argv[]){
 
 	//GLOBAL solution (reusing)
 	
-	#pragma omp parallel for //nowait 
+	#pragma omp parallel for reduction(+:removes) 
 	for(uint32_t t = 0; t < k; t++){
 
 //	printf("### [%d] = %d ###\n", omp_get_thread_num(), t);
@@ -245,6 +257,7 @@ int main(int argc, char *argv[]){
 			while(Lg!=NULL){
 				if(Lg->value > min_lcp) remove(&Lg);
 				else break;
+				removes++;
 	        	}
 	
 			if(Llocal[t][p]!=NULL){
@@ -253,6 +266,9 @@ int main(int argc, char *argv[]){
 			}
 
 			if(Lg)
+			#if SAVE_SPACE
+				if(t!=Prefix[p])
+			#endif
 			#if RESULT
 				result[t][Prefix[p]] = Lg->value;
 			#else
