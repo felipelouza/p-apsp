@@ -17,7 +17,7 @@
 #include <omp.h>
 
 #define DEBUG 1
-#define SAVE_SPACE 0
+#define SAVE_SPACE 1 
 
 //output format [row, column]
 #define RESULT 0 // 0 = [prefix, suffix], 1 = [suffix, prefix]
@@ -37,7 +37,7 @@ typedef map<uint32_t, uint32_t> tMII;
 typedef vector<tMII> tVMII;
 
 inline int top(Tl **list, int n);
-inline void insert(Tl ***next, int n, int value);
+inline void insert(Tl ***next, int n, int value, Tl *sentinel);
 inline void remove(Tl **list);
 inline void prepend(Tl **list1, Tl **list2, Tl***next, int n);
 
@@ -132,11 +132,10 @@ int main(int argc, char *argv[]){
 
 	store_to_cache(str_int, conf::KEY_TEXT_INT, m_config);
 
-/*
 	construct_sa<0>(m_config);
 	construct_lcp_PHI<0>(m_config);
 	cout<<"constructed enhanced suffix array"<<endl;
-*/
+
 	int_vector<> sa;
 	int_vector<> lcp;
 
@@ -177,7 +176,7 @@ int main(int argc, char *argv[]){
 //	Tl **Next[k][k];
 
 	Tl ***Llocal = (Tl ***)  malloc(k * sizeof(Tl**));
-//	Tl **Lglobal = (Tl **)   malloc(k * sizeof(Tl*));
+	Tl **Lglobal = (Tl **)   malloc(k * sizeof(Tl*));
 	Tl ****Next   = (Tl ****)  malloc(k * sizeof(Tl***));
 
 	for(uint32_t i = 0; i < k; i++){
@@ -203,10 +202,10 @@ int main(int argc, char *argv[]){
 //		Lg[i] = sentinel;
 //		Ll[i] = sentinel;
 //		next[i] = Ll+i;
-//		Lglobal[i] = sentinel;
+		Lglobal[i] = sentinel;
 
 		for(uint32_t j = 0; j < k; j++){
-			Llocal[i][j] = NULL; // sentinel;
+			Llocal[i][j] =  sentinel;
 			Next[i][j] = &Llocal[i][j];
 		}
 
@@ -231,9 +230,12 @@ int main(int argc, char *argv[]){
 	#pragma omp parallel for //reduction(+:inserts)
 	for(uint32_t p = 0; p < k; p++){
 	
+//		printf("### [%d] = %d ###\n", omp_get_thread_num(), p);
+
 //		uint32_t prefix = str_int[(sa[block[p]]+m-1)%m];
 //		uint32_t prefix = Prefix[p];
 		uint32_t min_lcp = UINT_MAX;
+//		Min_lcp[p] = UINT_MAX;
 
 		//LOCAL solution:
 		uint32_t previous =(p>0? block[p-1]: k+1);
@@ -247,7 +249,7 @@ int main(int argc, char *argv[]){
 				if(t < k)//complete overlap
 					if(min_lcp >= threshold){
 //						insert(next, t, lcp[i+1], sentinel); inserts++;
-						insert(Next[t], p, lcp[i+1]); inserts++;
+						insert(Next[t], p, lcp[i+1], sentinel); inserts++;
 					}
         		}
 		}
@@ -262,39 +264,67 @@ int main(int argc, char *argv[]){
 	c_start = clock();
 
 	//GLOBAL solution (reusing)
-	
-	#pragma omp parallel for //nowait 
-	for(uint32_t t = 0; t < k; t++){
 
-//	printf("### [%d] = %d ###\n", omp_get_thread_num(), t);
+	int sum=0;	
 
-		uint32_t min_lcp;
-		Tl *Lg = NULL;
+	#pragma omp parallel //reduction(+:removes)
+	{
+	
+		if(omp_get_thread_num()==0)
+			printf("N_THREADS: %d\n", omp_get_num_threads());
+	
+		#pragma omp for //reduction(+:sum)//nowait 
+		for(uint32_t t = 0; t < k; t++){
 
-		for(uint32_t p = 0; p < k; ++p){
+	//	printf("### [%d] = %d ###\n", omp_get_thread_num(), t);
+		
+			uint32_t min_lcp;
+			Tl *Lg = sentinel;
+
+			for(uint32_t p = 0; p < k; ++p){
+		
+	//			uint32_t prefix = str_int[(sa[block[p]]+m-1)%m];
+				min_lcp = Min_lcp[p];
+				while(Lg->value > min_lcp){
+		        		remove(&Lg);
+	//		       		removes++;
+		        	}
 	
-			min_lcp = Min_lcp[p];
-				
-			while(Lg!=NULL){
-				if(Lg->value > min_lcp) remove(&Lg);
-				else break;
-	        	}
-	
-			if(Llocal[t][p]!=NULL){
-				if(Lg) prepend(&Lg, Llocal[t], Next[t], p);
-				else Lg = Llocal[t][p];
+				if(Lg->value){	
+					prepend(&Lg, Llocal[t], Next[t], p);
+				}
+				else{
+					Lg = Llocal[t][p];
+				}
+
+				if(Lg->value)
+					Llocal[t][p]->value = Lg->value;
+
+				//uint32_t prefix = Prefix[p];
 			}
+		}
 
-			if(Lg)
-			#if RESULT
-				result[t][Prefix[p]] = Lg->value;
-			#else
-				result[Prefix[p]][t] = Lg->value;
-			#endif
+		#pragma omp for reduction(+:sum)//nowait 
+		for(uint32_t t = 0; t < k; t++){
 
+			for(uint32_t p = 0; p < k; ++p){
+
+		        	//#if SAVE_SPACE
+				if(Llocal[t][p]->value){
+		        	//#endif
+		        		if(t!=Prefix[p])
+					#if RESULT
+						result[t][Prefix[p]] = Llocal[t][p]->value;
+					#else
+						result[Prefix[p]][t] = Llocal[t][p]->value;
+					#endif
+				}
+		//		else
+		//			sum++;
+			}
 		}
 	}
-
+cout<<"sum = "<<sum<<endl;
 	cout<<"--"<<endl;
 	printf("CLOCK = %lf TIME = %lf (in seconds)\n", (clock() - c_start) / (double)(CLOCKS_PER_SEC), difftime (time(NULL),t_start));
 	cout<<"--"<<endl;
@@ -303,13 +333,9 @@ int main(int argc, char *argv[]){
 	c_start = clock();
 
 	//contained suffixes
-	#pragma omp parallel for //firstprivate(threshold,m,k) 
+	#pragma omp parallel for 
 	for(uint32_t p = 0; p < k; p++){
 		uint32_t prefix = Prefix[p];
-
-		#if SAVE_SPACE == 0
-			result[p][p] = 0;
-		#endif
 
 		//contained suffixes
 		uint32_t q = block[p]+1;
@@ -412,19 +438,20 @@ inline int top(Tl **list, int n){
     return list[n]->value;
 }
 
-inline void insert(Tl ***next, int n, int value){
+inline void insert(Tl ***next, int n, int value, Tl *sentinel){
     
     Tl *aux;
     aux = (Tl *) malloc(sizeof(*aux));
     aux->value = value;
-    aux->prox = NULL;    
+    aux->prox = sentinel;    
     *(next[n]) = aux;
     next[n] = &(aux->prox);
 }    
     
 inline void remove(Tl **list){
     
-    Tl *aux = *list;
+    Tl *aux;
+    aux = *list;
     *list = (*list)->prox;
     free(aux);
 }
