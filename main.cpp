@@ -10,14 +10,15 @@
 #include <sdsl/config.hpp>
 #include <sdsl/construct_config.hpp>
 #include <iostream>
-#include <cassert>
 #include <climits>
+#include "lib/file.h"
 #include "external/malloc_count/malloc_count.h"
 
 #include <omp.h>
 
 #define DEBUG 1
 #define SAVE_SPACE 1
+#define OMP 1
 
 //output format [row, column]
 #define RESULT 1 // 0 = [prefix, suffix], 1 = [suffix, prefix]
@@ -36,7 +37,9 @@ typedef struct _list{
 typedef map<uint32_t, uint32_t> tMII;
 typedef vector<tMII> tVMII;
 
-inline int top(Tl **list, int n);
+typedef map<uint32_t, *Tl> tML;
+typedef vector<tML> tVL;
+
 inline void insert(Tl ***next, int n, int value);
 inline void remove(Tl **list);
 inline void prepend(Tl **list1, Tl **list2, Tl***next, int n);
@@ -46,83 +49,70 @@ double start, total;
 int main(int argc, char *argv[]){
 
 	uint32_t k = 0;
-	uint32_t m = 0;
+	uint32_t n = 0;
 	uint32_t l = 0;
-	vector<uint32_t> str; // vector for the text 
 	vector<uint32_t> ms;  // vector containing the length of the ests
 
-	if(argc!=6)
+	if(argc!=7)
 		return 1;
 
-	ifstream f_input(argv[1]); //input file
-	if(!f_input.is_open()) return 1;
+	char* c_dir = argv[1];
+	char* c_file = argv[2];
 
-	uint32_t n_strings;
-    	sscanf(argv[2], "%u", &n_strings);
+    	sscanf(argv[3], "%u", &k);
+
+	file_chdir(c_dir);
+
+	unsigned char **R = (unsigned char**) file_load_multiple(c_file, k, &n);
+	if(!R){
+		fprintf(stderr, "Error: less than %d strings in %s\n", k, c_file);
+		return 0;
+	}
+
+	n++;
+	int_vector<> str_int(n);
+
+	for(uint32_t i=0; i<k; i++){
+		uint32_t m = strlen((char*)R[i]);
+		ms.push_back(m);
+		for(uint32_t j=0; j<m; j++)
+			str_int[l++] = R[i][j]+(k+1)-'A';
+		str_int[l++] = i+1; //add $_i as separator
+	}	
+	str_int[l]=0;
+
+/*
+	for(uint32_t i=0; i<n; i++)
+		cout<<str_int[i]<<"|";
+	cout<<endl;
+*/
 
 	uint32_t threshold;
-	sscanf(argv[3], "%u", &threshold);
+	sscanf(argv[4], "%u", &threshold);
+
+	uint32_t output;
+	sscanf(argv[5], "%u", &output);
 
 	int n_threads;
-	sscanf(argv[5], "%d", &n_threads);
-	printf("K: %d\n", n_strings);
+	sscanf(argv[6], "%d", &n_threads);
+	printf("K: %d\n", k);
 
-	omp_set_num_threads(n_threads);
-
-	#pragma omp parallel
-	{
-	if(omp_get_thread_num()==0)
-		printf("N_THREADS: %d\n", omp_get_num_threads());
-	}
-
-	printf("N_PROCS: %d\n", omp_get_num_procs());
-
-	while(f_input.getline(buf, buflen-1) ){
-		if(k>0 and buf[0]=='>'){
-			if(k>=n_strings)
-				break;
-			str.push_back(k);
-			ms.push_back(l);
-			l=0;
-		}	
-		if(buf[0]>='A' and buf[0]<='Z'){
-			if( l==0 )
-				++k;
-			uint64_t i=0;
-			while( buf[i]!='\0' ){
-				str.push_back(buf[i]-'A');
-				++i;
-			}
-			l += i;
+	#if OMP
+		omp_set_num_threads(n_threads);
+	
+		#pragma omp parallel
+		{
+		if(omp_get_thread_num()==0)
+			printf("N_THREADS: %d\n", omp_get_num_threads());
 		}
-	}
-	ms.push_back(l);
-	str.push_back(k);
+		printf("N_PROCS: %d\n", omp_get_num_procs());
+	#endif
 
-	f_input.close();
-	cerr<<"input successfully read"<<endl;
-
-	for(uint32_t i=0,j=0; i<str.size(); ++i, ++j){
-		uint32_t f=i;
-		while(i-f < ms[j]){
-			str[i]+= k+1;	
-			++i;
-		}
-	}
-
-	cout<<"length of all ESTS m="<<str.size()<<" Number of ESTS k="<<k<<endl;
+	cout<<"length of all strings n = "<<n<<endl; //" Number of strings k="<<k<<endl;
 	#if SAVE_SPACE
 		cout<<"SAVE_SPACE"<<endl;
 	#endif
 
-	str.push_back(0);
-	m = str.size();
-
-	int_vector<> str_int(m);
-	for(uint32_t i=0; i<m; i++)
-		str_int[i] =  str[i];
-
-	string input(argv[1]);
  	string dir = ".";
     	string id = "tmp."+to_string(k);
     	cache_config m_config(true, dir, id);
@@ -133,27 +123,35 @@ int main(int argc, char *argv[]){
 	int_vector<> lcp;
 
 	if(!load_from_cache(sa, conf::KEY_SA, m_config)){
-		start = omp_get_wtime();
+		#if OMP
+			start = omp_get_wtime();
+		#endif
 		construct_sa<0>(m_config); load_from_cache(sa, conf::KEY_SA, m_config);
-		printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
+		#if OMP
+			printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
+		#endif
 	}
 
 	if(!load_from_cache(lcp, conf::KEY_LCP, m_config)){
-		start = omp_get_wtime();
+		#if OMP
+			start = omp_get_wtime();
+		#endif
 		construct_lcp_PHI<0>(m_config); load_from_cache(lcp, conf::KEY_LCP, m_config);
-		printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
+		#if OMP
+			printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
+		#endif
 	}
 
-    	uint32_t *block = (uint32_t *) malloc(k * sizeof(uint32_t));
+    	uint32_t *Block = (uint32_t *) malloc(k * sizeof(uint32_t));
     	uint32_t *Prefix = (uint32_t *) malloc(k * sizeof(uint32_t));
 
 	//Find initial position of each Block b_i
 	size_t tmp=0; 
 	for(size_t i=0;i<sa.size();++i){
 
-		uint32_t t = str_int[(sa[i]+m-1)%m];	
+		uint32_t t = str_int[(sa[i]+n-1)%n];	
 		if( t < k ){// found whole string as suffix
-			block[tmp] = i;
+			Block[tmp] = i;
 			Prefix[tmp] = t;
 			tmp++;
 		}
@@ -162,7 +160,9 @@ int main(int argc, char *argv[]){
 	Tl ***Llocal = (Tl ***)  malloc(k * sizeof(Tl**));
 	Tl ****Next   = (Tl ****)  malloc(k * sizeof(Tl***));
 
-	#pragma omp parallel for
+	#if OMP
+		#pragma omp parallel for
+	#endif
 	for(uint32_t i = 0; i < k; i++){
 
 		Llocal[i] = (Tl **)  malloc(k * sizeof(Tl**));
@@ -173,7 +173,11 @@ int main(int argc, char *argv[]){
 			Next[i][j] = &Llocal[i][j];
 		}
     	}
-	
+
+/*	
+	tVL LLOCAL(k);
+	tVL NEXT(k);
+*/
 
 	#if SAVE_SPACE
 		tVMII result(k);//(k, tVI(k,0));
@@ -188,21 +192,25 @@ int main(int argc, char *argv[]){
 
 	cout<<"computing.."<<endl;
 
-	total = omp_get_wtime();
-	start = omp_get_wtime();
+	#if OMP
+		total = omp_get_wtime();
+		start = omp_get_wtime();
+	#endif
 
 	int inserts = 0, removes = 0;
 
 	uint32_t *Min_lcp = (uint32_t*) malloc(k*sizeof(uint32_t));
 
-	#pragma omp parallel for reduction(+:inserts)
+	#if OMP
+		#pragma omp parallel for reduction(+:inserts)
+	#endif
 	for(uint32_t p = 0; p < k; p++){
 	
 		uint32_t min_lcp = UINT_MAX;
 
 		//LOCAL solution:
-		uint32_t previous =(p>0? block[p-1]: k+1);
-		for(uint32_t i=block[p]-1; i>=previous; --i){
+		uint32_t previous =(p>0? Block[p-1]: k+1);
+		for(uint32_t i=Block[p]-1; i>=previous; --i){
 
 			if(min_lcp >= lcp[i+1]){
 
@@ -218,13 +226,17 @@ int main(int argc, char *argv[]){
 		Min_lcp[p] = min_lcp;
 	}
 
-	cout<<"--"<<endl;
-	printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
-
-	start = omp_get_wtime();
+	#if OMP
+		cout<<"--"<<endl;
+		printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
+		start = omp_get_wtime();
+	#endif
 
 	//GLOBAL solution (reusing)	
-	#pragma omp parallel for reduction(+:removes) 
+	
+	#if OMP
+		#pragma omp parallel for reduction(+:removes) 
+	#endif
 	for(uint32_t t = 0; t < k; t++){
 
 	//printf("### [%d] = %d ###\n", omp_get_thread_num(), t);
@@ -245,6 +257,7 @@ int main(int argc, char *argv[]){
 			if(Llocal[t][p]!=NULL){
 				if(Lg) prepend(&Lg, Llocal[t], Next[t], p);
 				else Lg = Llocal[t][p];
+				Llocal[t][p] = NULL;
 			}
 
 			if(Lg)
@@ -258,57 +271,63 @@ int main(int argc, char *argv[]){
 			#endif
 
 		}
+
+		//free	
+		while(Lg!=NULL){
+			remove(&Lg);
+	        }
 	}
 
+	#if OMP
 	cout<<"--"<<endl;
 	printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
-
 	start = omp_get_wtime();
-	
+	#endif	
+
 	//contained suffixes
-	#pragma omp parallel for //firstprivate(threshold,m,k) 
+	#if OMP
+		#pragma omp parallel for //firstprivate(threshold,n,k) 
+	#endif
 	for(uint32_t p = 0; p < k; p++){
-		uint32_t prefix = Prefix[p];
+//		uint32_t prefix = Prefix[p];
 
 		#if SAVE_SPACE == 0
 			result[p][p] = 0;
 		#endif
 
 		//contained suffixes
-		uint32_t q = block[p]+1;
+		uint32_t q = Block[p]+1;
 		uint32_t tt;
-		while(q < m and lcp[q] == ms[prefix] and ((tt=str_int[sa[q]+ms[prefix]]-1) < k ) ){
+		while(q < n and lcp[q] == ms[Prefix[p]] and ((tt=str_int[sa[q]+ms[Prefix[p]]]-1) < k ) ){
 			if(lcp[q] >= threshold)
 				#if RESULT 
-					result[tt][prefix] = lcp[q];
+					result[tt][Prefix[p]] = lcp[q];
 				#else
-					result[prefix][tt] = lcp[q];
+					result[Prefix[p]][tt] = lcp[q];
 				#endif
 			q++;
 		}
 
 	}
 
-	//end = omp_get_wtime();
-	cout<<"--"<<endl;
-	printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
+	#if OMP
+		cout<<"--"<<endl;
+		printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
 
-	cout<<"##"<<endl;
-	printf("TIME = %f (in seconds)\n", omp_get_wtime()-total);
-	cout<<"##"<<endl;
-
+		cout<<"##"<<endl;
+		printf("TIME = %f (in seconds)\n", omp_get_wtime()-total);
+		cout<<"##"<<endl;
+	#endif
 
    	printf("inserts %i\n", inserts);
 	printf("removes %i\n", removes);
 
 	cout<<"--"<<endl;
 
-	uint32_t output;
-	sscanf(argv[4], "%u", &output);
 
 	#if SAVE_SPACE
 		
-		/**/
+		#if DEBUG
 		uint32_t i = 0;
 		for (tVMII::iterator it_row=result.begin(); it_row!=result.end(); ++it_row){			
 			uint32_t j = 0;
@@ -321,10 +340,10 @@ int main(int argc, char *argv[]){
 				if(i++ > 10) break;
 			}
 		}
-		/**/
+		#endif
 
 		if(output==1){
-			ofstream out_file("results_new.bin",ios::out | ios::binary);			
+			ofstream out_file("output."+id+".par.bin",ios::out | ios::binary);			
 			for (tVMII::iterator it_row=result.begin(); it_row!=result.end(); ++it_row)
 				for(tMII::iterator it_column=it_row->begin(); it_column!=it_row->end(); ++it_column)
 					out_file.write((char*)&it_column->second, sizeof(uint32_t));
@@ -332,14 +351,16 @@ int main(int argc, char *argv[]){
 		}
 	#else
 
+		#if DEBUG
 		for(uint32_t i=0; i<10 && i<k; ++i){
 			for(uint32_t j=0; j<10 && j<k; ++j)
 				cout<<result[i][j]<<" ";
 			cout<<endl;
 		}
+		#endif
 
 		if(output==1){
-			ofstream out_file("results_new.bin",ios::out | ios::binary);
+			ofstream out_file("output."+id+".par.bin",ios::out | ios::binary);			
 			for(uint32_t i=0; i<k; ++i)
 				for(uint32_t j=0; j<k; ++j)
 					out_file.write((char*)&result[i][j], sizeof(uint32_t));
@@ -353,26 +374,18 @@ int main(int argc, char *argv[]){
 	#endif
 
 	//free Lists
-/*
 	for(uint32_t i = 0; i<k; ++i){
-	    Tl *aux = Lg[i];
-	    while(aux != sentinel){
-	        Lg[i] = Lg[i]->prox;
-	        free(aux);
-	        aux = Lg[i];
-	    }
+		free(Llocal[i]);
+		free(Next[i]);
 	}
-*/	
-	free(block);
-//	free(Lg);
-//	free(Ll);
-//	free(next);
+
+	free(Block);
+	free(Prefix);
+	free(Min_lcp);
+	free(Llocal);
+	free(Next);
 
 	return 0;
-}
-
-inline int top(Tl **list, int n){
-    return list[n]->value;
 }
 
 inline void insert(Tl ***next, int n, int value){
@@ -397,5 +410,6 @@ inline void prepend(Tl **list1, Tl **list2, Tl***next, int n){
     *(next[n]) = *list1;
     *list1 = list2[n];
     //list2[n] = sentinel;
+    list2[n] = NULL;
     next[n] = list2 + n;
 }

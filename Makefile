@@ -23,7 +23,7 @@ CLAGS= -DSYMBOLBYTES=1
 #INPUT = all_ests.fasta
 
 DIR = ~/dataset/reads/
-INPUT = reads.fastq
+INPUT = Vr6_L001_R1.clipped.fastq
 
 K = 4 
 L = 1 # min_lcp
@@ -38,7 +38,7 @@ suffix_array_solution_prac: external/suffix_array_solution_prac.cpp ${LIBOBJ}
 	$(MY_CXX) $(CXX_FLAGS) external/suffix_array_solution_prac.cpp $(CCLIB) -o external/suffix_array_solution_prac  
 
 #lib/file.o
-lib: 
+lib: lib/file.o 
 	$(MY_CXX) -c lib/file.c -o lib/file.o 
 
 main: lib main.cpp
@@ -54,7 +54,7 @@ clean:
 	rm external/suffix_array_solution_prac -f
 	rm main -f
 	rm *.bin -f
-	rm lib/*.bin -f
+	rm lib/*.o -f
 	rm *.sdsl -f
 
 run: run_main 
@@ -76,6 +76,7 @@ valgrind:
 	valgrind --tool=memcheck --leak-check=full --track-origins=yes ./main $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
 
 diff:
+	ls -lh $(DIR)output.tmp.$(K).*.bin
 	diff $(DIR)output.tmp.$(K).seq.bin $(DIR)output.tmp.$(K).par.bin 
 
 remove:

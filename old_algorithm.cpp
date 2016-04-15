@@ -34,7 +34,6 @@ typedef struct _list{
 typedef map<uint32_t, uint32_t> tMII;
 typedef vector<tMII> tVMII;
 
-inline int top(Tl **list, int n);
 inline void insert(Tl ***next, int n, int value, Tl *sentinel);
 inline void remove(Tl **list, int n);
 inline void prepend(Tl **list1, Tl **list2, Tl***next, int n, Tl *sentinel);
@@ -80,12 +79,6 @@ int main(int argc, char *argv[]){
 	cout<<endl;
 */
 
-//return 0;
-
-//	ifstream f_input(argv[1]); //input file
-//	if(!f_input.is_open()) return 1;
-
-
 	uint32_t threshold;
 	sscanf(argv[4], "%u", &threshold);
 
@@ -95,56 +88,14 @@ int main(int argc, char *argv[]){
 	int n_threads;
 	sscanf(argv[6], "%d", &n_threads);
 	printf("K: %d\n", k);
-/**
-	while(f_input.getline(buf, buflen-1) ){
-		if(k>0 and buf[0]=='>'){
-			if(k>=n_strings)
-				break;
-			str.push_back(k);
-			ms.push_back(l);
-			l=0;
-		}	
-		if(buf[0]>='A' and buf[0]<='Z'){
-			if( l==0 )
-				++k;
-			uint64_t i=0;
-			while( buf[i]!='\0' ){
-				str.push_back(buf[i]-'A');
-				++i;
-			}
-			l += i;
-		}
-	}
-	ms.push_back(l);
-	str.push_back(k);
 
-	f_input.close();
-	cerr<<"input successfully read"<<endl;
 
-	for(uint32_t i=0,j=0; i<str.size(); ++i, ++j){
-		uint32_t f=i;
-		while(i-f < ms[j]){
-			str[i]+= k+1;	
-			++i;
-		}
-	}
-**/
 
 	cout<<"length of all strings n = "<<n<<endl; //" Number of strings k="<<k<<endl;
 	#if SAVE_SPACE
 		cout<<"SAVE_SPACE"<<endl;
 	#endif
 
-/*
-	str.push_back(0);
-	n = str.size();
-
-	int_vector<> str_int(n);
-	for(uint32_t i=0; i<n; i++)
-		str_int[i] =  str[i];
-*/
-
-//	string input(argv[1]);
  	string dir = ".";
     	string id = "tmp."+to_string(k);
     	cache_config m_config(true, dir, id);
@@ -344,10 +295,6 @@ int main(int argc, char *argv[]){
 	free(sentinel);
 
 	return 0;
-}
-
-inline int top(Tl **list, int n){
-    return list[n]->value;
 }
 
 inline void insert(Tl ***next, int n, int value, Tl *sentinel){
