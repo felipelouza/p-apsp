@@ -6,19 +6,25 @@ INC_DIR = ${HOME}/include
 MY_CXX_FLAGS= -std=c++11 -Wall -Wextra  -DNDEBUG $(CODE_COVER)
 MY_CXX_OPT_FLAGS= -O3 -ffast-math -funroll-loops -m64 -fomit-frame-pointer -D_FILE_OFFSET_BITS=64
 #MY_CXX_OPT_FLAGS= -m64 -fomit-frame-pointer -D_FILE_OFFSET_BITS=64
-MY_CXX=/usr/bin/c++
+MY_CXX=g++
 
 LFLAGS = -lm -ldl
-LIBOBJ = external/malloc_count/malloc_count.o
 
-CXX_FLAGS=$(MY_CXX_FLAGS) $(MY_CXX_OPT_FLAGS) -I$(INC_DIR) -L$(LIB_DIR) $(LIBOBJ) $(LFLAGS)
+LIBOBJ = external/malloc_count/malloc_count.o\
+	 lib/file.o
+
+CXX_FLAGS=$(MY_CXX_FLAGS) $(MY_CXX_OPT_FLAGS) -I$(INC_DIR) -L$(LIB_DIR) $(LFLAGS)
 
 CLAGS= -DSYMBOLBYTES=1
 
 ####
 
-#INPUT = dataset/c_elegans_ests_200.fasta
-INPUT = ../dataset/all_ests.fasta
+#DIR = ~/dataset/ests/
+#INPUT = all_ests.fasta
+
+DIR = ~/dataset/reads/
+INPUT = reads.fastq
+
 K = 4 
 L = 1 # min_lcp
 OUTPUT = 0
@@ -31,11 +37,15 @@ all: main
 suffix_array_solution_prac: external/suffix_array_solution_prac.cpp ${LIBOBJ}
 	$(MY_CXX) $(CXX_FLAGS) external/suffix_array_solution_prac.cpp $(CCLIB) -o external/suffix_array_solution_prac  
 
-main: main.cpp ${LIBOBJ}
-	$(MY_CXX) $(CXX_FLAGS) main.cpp $(CCLIB) -o main  
+#lib/file.o
+lib: 
+	$(MY_CXX) -c lib/file.c -o lib/file.o 
 
-old_algorithm: old_algorithm.cpp ${LIBOBJ}
-	$(MY_CXX) $(CXX_FLAGS) old_algorithm.cpp $(CCLIB) -o old_algorithm  
+main: lib main.cpp
+	$(MY_CXX) $(CXX_FLAGS) main.cpp $(CCLIB) -o main ${LIBOBJ} 
+
+old_algorithm: lib old_algorithm.cpp
+	$(MY_CXX) $(CXX_FLAGS) old_algorithm.cpp $(CCLIB) -o old_algorithm  ${LIBOBJ} 
 
 strip: utils/strip.cpp
 	$(MY_CXX) utils/strip.cpp -o utils/strip
@@ -44,28 +54,31 @@ clean:
 	rm external/suffix_array_solution_prac -f
 	rm main -f
 	rm *.bin -f
+	rm lib/*.bin -f
 	rm *.sdsl -f
 
 run: run_main 
 #run_suff 
 
 run_suff: 
-	external/suffix_array_solution_prac $(INPUT) $(K) $(L) $(OUTPUT)
+	external/suffix_array_solution_prac $(DIR) $(INPUT) $(K) $(L) $(OUTPUT)
 	
 run_main: 
-	./main $(INPUT) $(K) $(L) $(OUTPUT) $(T)
+	./main $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
 	
 run_old: 
-	./old_algorithm $(INPUT) $(K) $(L) $(OUTPUT) $(T)
+	./old_algorithm $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
 
 run_strip: 
 	utils/strip $(INPUT) $(K)
 	
-valgrind_main: main
-	valgrind --tool=memcheck --leak-check=full --track-origins=yes ./main $(INPUT) $(K) $(L) $(OUTPUT) $(T)
-
+valgrind: 
+	valgrind --tool=memcheck --leak-check=full --track-origins=yes ./main $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
 
 diff:
-	ls -lh *.bin
-	diff results_new.bin results_old.bin
+	diff $(DIR)output.tmp.$(K).seq.bin $(DIR)output.tmp.$(K).par.bin 
+
+remove:
+	rm $(DIR)*.sdsl
+	rm $(DIR)*.bin
 

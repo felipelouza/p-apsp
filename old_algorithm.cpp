@@ -13,6 +13,7 @@
 #include <cassert>
 #include <climits>
 #include "external/malloc_count/malloc_count.h"
+#include "lib/file.h"
 
 #include <omp.h>
 
@@ -41,34 +42,60 @@ inline void prepend(Tl **list1, Tl **list2, Tl***next, int n, Tl *sentinel);
 int main(int argc, char *argv[]){
 
 	uint32_t k = 0;
-	uint32_t m = 0;
+	uint32_t n = 0;
 	uint32_t l = 0;
-	vector<uint32_t> str; // vector for the text 
 	vector<uint32_t> ms;  // vector containing the length of the ests
 
-	if(argc!=6)
+	if(argc!=7)
 		return 1;
 
-	ifstream f_input(argv[1]); //input file
-	if(!f_input.is_open()) return 1;
+	char* c_dir = argv[1];
+	char* c_file = argv[2];
 
-	uint32_t n_strings;
-    	sscanf(argv[2], "%u", &n_strings);
+    	sscanf(argv[3], "%u", &k);
 
-	uint32_t threshold;
-	sscanf(argv[3], "%u", &threshold);
+	file_chdir(c_dir);
 
-	int n_threads;
-	sscanf(argv[5], "%d", &n_threads);
-	printf("K: %d\n", n_strings);
-
-	omp_set_num_threads(n_threads);
-
-	#pragma omp parallel
-	{
-	printf("N_THREADS: %d\n", omp_get_num_threads());
+	unsigned char **R = (unsigned char**) file_load_multiple(c_file, k, &n);
+	if(!R){
+		fprintf(stderr, "Error: less than %d strings in %s\n", k, c_file);
+		return 0;
 	}
 
+	n++;
+	int_vector<> str_int(n);
+
+	for(uint32_t i=0; i<k; i++){
+		uint32_t m = strlen((char*)R[i]);
+		ms.push_back(m);
+		for(uint32_t j=0; j<m; j++)
+			str_int[l++] = R[i][j]+(k+1)-'A';
+		str_int[l++] = i+1; //add $_i as separator
+	}	
+	str_int[l]=0;
+
+/*
+	for(uint32_t i=0; i<n; i++)
+		cout<<str_int[i]<<"|";
+	cout<<endl;
+*/
+
+//return 0;
+
+//	ifstream f_input(argv[1]); //input file
+//	if(!f_input.is_open()) return 1;
+
+
+	uint32_t threshold;
+	sscanf(argv[4], "%u", &threshold);
+
+	uint32_t output;
+	sscanf(argv[5], "%u", &output);
+
+	int n_threads;
+	sscanf(argv[6], "%d", &n_threads);
+	printf("K: %d\n", k);
+/**
 	while(f_input.getline(buf, buflen-1) ){
 		if(k>0 and buf[0]=='>'){
 			if(k>=n_strings)
@@ -101,43 +128,51 @@ int main(int argc, char *argv[]){
 			++i;
 		}
 	}
+**/
 
-	/*	
-	for(uint32_t i=0; i<str.size(); ++i)
-		cout<<str[i]<<' ';
-	cout<<endl;
-	*/
-
-	cout<<"length of all ESTS m="<<str.size()<<" Number of ESTS k="<<k<<endl;
+	cout<<"length of all strings n = "<<n<<endl; //" Number of strings k="<<k<<endl;
 	#if SAVE_SPACE
 		cout<<"SAVE_SPACE"<<endl;
 	#endif
 
+/*
 	str.push_back(0);
-	m = str.size();
+	n = str.size();
 
-	int_vector<> str_int(m);
-	for(uint32_t i=0; i<m; i++)
+	int_vector<> str_int(n);
+	for(uint32_t i=0; i<n; i++)
 		str_int[i] =  str[i];
+*/
 
+//	string input(argv[1]);
  	string dir = ".";
-    	string id = "tmp";
+    	string id = "tmp."+to_string(k);
     	cache_config m_config(true, dir, id);
 
 	store_to_cache(str_int, conf::KEY_TEXT_INT, m_config);
 
-	construct_sa<0>(m_config);
-	construct_lcp_PHI<0>(m_config);
-	cout<<"constructed enhanced suffix array"<<endl;
-
 	int_vector<> sa;
 	int_vector<> lcp;
 
-	load_from_cache(sa, conf::KEY_SA, m_config);
-	load_from_cache(lcp, conf::KEY_LCP, m_config);
+	if(!load_from_cache(sa, conf::KEY_SA, m_config)){
+		#if OMP
+			start = omp_get_wtime();
+		#endif
+		construct_sa<0>(m_config); load_from_cache(sa, conf::KEY_SA, m_config);
+		#if OMP
+			printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
+		#endif
+	}
 
-//FELIPE
-	/**/
+	if(!load_from_cache(lcp, conf::KEY_LCP, m_config)){
+		#if OMP
+			start = omp_get_wtime();
+		#endif
+		construct_lcp_PHI<0>(m_config); load_from_cache(lcp, conf::KEY_LCP, m_config);
+		#if OMP
+			printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
+		#endif
+	}
 
 
     	uint32_t *block = (uint32_t *) malloc(k * sizeof(uint32_t));
@@ -146,7 +181,7 @@ int main(int argc, char *argv[]){
 	size_t tmp=0; 
 	for(size_t i=0;i<sa.size();++i){
 
-		uint32_t t = str_int[(sa[i]+m-1)%m];	
+		uint32_t t = str_int[(sa[i]+n-1)%n];	
 		if( t < k ){// found whole string as suffix
 			block[tmp++] = i;
 		}
@@ -189,7 +224,7 @@ int main(int argc, char *argv[]){
 
 	for(uint32_t p = 0; p < k; ++p){
 		
-		uint32_t prefix = str_int[(sa[block[p]]+m-1)%m];
+		uint32_t prefix = str_int[(sa[block[p]]+n-1)%n];
 		uint32_t min_lcp = UINT_MAX;
 
 		//LOCAL solution:
@@ -228,7 +263,7 @@ int main(int argc, char *argv[]){
 		//contained suffixes
 		uint32_t q = block[p]+1;
 		uint32_t tt;
-		while(q < m and lcp[q] == ms[prefix] and ((tt=str_int[sa[q]+ms[prefix]]-1) < k ) ){
+		while(q < n and lcp[q] == ms[prefix] and ((tt=str_int[sa[q]+ms[prefix]]-1) < k ) ){
 			if(lcp[q] >= threshold)
 				result[prefix][tt] = lcp[q];
 			q++;
@@ -245,9 +280,6 @@ int main(int argc, char *argv[]){
 	printf("removes %i\n", removes);
 
 	cout<<"--"<<endl;
-
-	uint32_t output;
-	sscanf(argv[4], "%u", &output);
 
 	#if SAVE_SPACE
 		
@@ -267,7 +299,7 @@ int main(int argc, char *argv[]){
 		/**/
 
 		if(output==1){
-			ofstream out_file("results_old.bin",ios::out | ios::binary);			
+                        ofstream out_file("output."+id+".seq.bin",ios::out | ios::binary);              
 			for (tVMII::iterator it_row=result.begin(); it_row!=result.end(); ++it_row)
 				for(tMII::iterator it_column=it_row->begin(); it_column!=it_row->end(); ++it_column)
 					out_file.write((char*)&it_column->second, sizeof(uint32_t));
@@ -282,7 +314,7 @@ int main(int argc, char *argv[]){
 		}
 
 		if(output==1){
-			ofstream out_file("results_old.bin",ios::out | ios::binary);
+                        ofstream out_file("output."+id+".seq.bin",ios::out | ios::binary);              
 			for(uint32_t i=0; i<k; ++i)
 				for(uint32_t j=0; j<k; ++j)
 					out_file.write((char*)&result[i][j], sizeof(uint32_t));
