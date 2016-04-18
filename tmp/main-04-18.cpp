@@ -18,7 +18,7 @@
 
 #define DEBUG 1
 #define SAVE_SPACE 1
-#define OMP 1
+#define OMP 0
 
 //output format [row, column]
 #define RESULT 0 // 0 = [prefix, suffix], 1 = [suffix, prefix]
@@ -45,9 +45,11 @@ typedef map<uint32_t, Tl**> tMLL;
 typedef vector<tMLL> tVLL;
 /**/
 
-inline void insert(tML& Llocal, tMLL& Next, int p, int value);
+inline void insert(Tl ***next, int n, int value);
+inline void INSERT(tML& LLOCAL, tMLL& NEXT, int p, int value);
 inline void remove(Tl **list);
-inline void prepend(Tl **Lg, tMLL& Next, tML& Llocal, int p);
+inline void prepend(Tl **list1, Tl **list2, Tl***next, int n);
+inline void PREPEND(Tl **Lg, tMLL& NEXT, tML& LLOCAL, int p);
 
 double start, total;
 
@@ -161,8 +163,27 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	tVL Llocal(k);
-	tVLL Next(k);
+/*
+	Tl ***Llocal = (Tl ***)  malloc(k * sizeof(Tl**));
+	Tl ****Next   = (Tl ****)  malloc(k * sizeof(Tl***));
+
+	#if OMP
+		#pragma omp parallel for
+	#endif
+	for(uint32_t i = 0; i < k; i++){
+
+		Llocal[i] = (Tl **)  malloc(k * sizeof(Tl**));
+		Next[i] = (Tl ***)  malloc(k * sizeof(Tl***));
+
+		for(uint32_t j = 0; j < k; j++){
+			Llocal[i][j] = NULL; // sentinel;
+			Next[i][j] = &Llocal[i][j];
+		}
+    	}
+
+*/	
+	tVL LLOCAL(k);
+	tVLL NEXT(k);
 
 
 	#if SAVE_SPACE
@@ -205,7 +226,8 @@ int main(int argc, char *argv[]){
 
 				if(t < k)//complete overlap
 					if(min_lcp >= threshold){
-						insert(Llocal[t], Next[t], p, lcp[i+1]); inserts++;
+						//insert(Next[t], p, lcp[i+1]); inserts++;
+						INSERT(LLOCAL[t], NEXT[t], p, lcp[i+1]); inserts++;
 					}
         		}
 		}
@@ -240,12 +262,21 @@ int main(int argc, char *argv[]){
 				removes++;
 	        	}
 	
-			if(Llocal[t].find(p)!=Llocal[t].end()){
+			if(LLOCAL[t].find(p)!=LLOCAL[t].end()){
 
-				if(Lg) prepend(&Lg, Next[t], Llocal[t], p);
-				else Lg = Llocal[t][p];
+				if(Lg) PREPEND(&Lg, NEXT[t], LLOCAL[t], p);
+				else Lg = LLOCAL[t][p];
+
+//				Llocal[t][p] = NULL;
+
 			}
 
+/*			if(Llocal[t][p]!=NULL){
+				if(Lg) prepend(&Lg, Llocal[t], Next[t], p);
+				else Lg = Llocal[t][p];
+				Llocal[t][p] = NULL;
+			}
+*/
 			if(Lg)
 			#if SAVE_SPACE
 				if(t!=Prefix[p])
@@ -367,43 +398,79 @@ int main(int argc, char *argv[]){
 
 	#endif
 
+/*
+	//free Lists
+	for(uint32_t i = 0; i<k; ++i){
+		free(Llocal[i]);
+		free(Next[i]);
+	}
+
+	free(Llocal);
+	free(Next);
+*/
+
 	delete[] Block;
 	delete[] Prefix;
 	delete[] Min_lcp;
+	//free(Llocal);
+	//free(Next);
 
 	return 0;
 }
 
-inline void insert(tML& Llocal, tMLL& Next,int p, int value){
+inline void INSERT(tML& LLOCAL, tMLL& NEXT,int p, int value){
 
 	Tl *aux;
    	aux = new Tl;
    	aux->value = value;
     	aux->prox = NULL;    
 
-	if(Next.find(p)!=Next.end() ){
+	if(NEXT.find(p)!=NEXT.end() ){
 
-		*(Next[p]) = aux;
+		*(NEXT[p]) = aux;
 	}
 	else{ //first element
 
-		Llocal[p] = aux;
+		LLOCAL[p] = aux;
 	}
 	
-	Next[p] = &(aux->prox);
+	NEXT[p] = &(aux->prox);
 }
 
+
+inline void insert(Tl ***next, int n, int value){
+    
+    Tl *aux;
+    //aux = (Tl *) malloc(sizeof(*aux));
+    aux = new Tl;
+    aux->value = value;
+    aux->prox = NULL;    
+    *(next[n]) = aux;
+    next[n] = &(aux->prox);
+}    
+    
 inline void remove(Tl **list){
     
     Tl *aux = *list;
     *list = (*list)->prox;
+    //free(aux);
     delete aux;
 }
 
-inline void prepend(Tl **Lg, tMLL& Next, tML& Llocal, int p){
+inline void PREPEND(Tl **Lg, tMLL& NEXT, tML& LLOCAL, int p){
 
-    *(Next[p]) = *Lg;
-    *Lg = Llocal[p];
-    Llocal[p] = NULL;
+    *(NEXT[p]) = *Lg;
+    *Lg = LLOCAL[p];
+    //list2[p] = sentinel;
+    LLOCAL[p] = NULL;
+//    NEXT[p] = LLOCAL + p;
 }
 
+inline void prepend(Tl **list1, Tl **list2, Tl***next, int n){
+
+    *(next[n]) = *list1;
+    *list1 = list2[n];
+    //list2[n] = sentinel;
+    list2[n] = NULL;
+    next[n] = list2 + n;
+}

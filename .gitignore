@@ -1,8 +1,10 @@
 # ignore objects and archives, anywhere in the tree.
 *.[oa]
-new_algorithm 
+old_algorithm 
+main
 suffix_array_solution_prac
 strip
 *.swp
+*.swo
 *.sdsl
 *.bin

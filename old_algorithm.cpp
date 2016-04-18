@@ -172,6 +172,7 @@ int main(int argc, char *argv[]){
 
 	int inserts = 0;
 	int removes = 0;
+	int contained = 0;
 
 	for(uint32_t p = 0; p < k; ++p){
 		
@@ -215,8 +216,10 @@ int main(int argc, char *argv[]){
 		uint32_t q = block[p]+1;
 		uint32_t tt;
 		while(q < n and lcp[q] == ms[prefix] and ((tt=str_int[sa[q]+ms[prefix]]-1) < k ) ){
-			if(lcp[q] >= threshold)
+			if(lcp[q] >= threshold){
+				contained++;	
 				result[prefix][tt] = lcp[q];
+			}
 			q++;
 		}
 
@@ -229,6 +232,7 @@ int main(int argc, char *argv[]){
 
    	printf("inserts %i\n", inserts);
 	printf("removes %i\n", removes);
+	printf("contained %i\n", contained);
 
 	cout<<"--"<<endl;
 
