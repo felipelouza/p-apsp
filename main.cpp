@@ -21,7 +21,7 @@
 #define OMP 1
 
 //output format [row, column]
-#define RESULT 0 // 0 = [prefix, suffix], 1 = [suffix, prefix]
+#define RESULT 1 // 0 = [prefix, suffix], 1 = [suffix, prefix]
 
 using namespace std;
 using namespace sdsl;
