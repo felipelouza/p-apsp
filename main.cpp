@@ -188,7 +188,7 @@ int main(int argc, char *argv[]){
 	uint32_t *Min_lcp = new uint32_t[k];
 
 	#if OMP
-		#pragma omp parallel for //reduction(+:inserts)
+		#pragma omp parallel for reduction(+:inserts)
 	#endif
 	for(uint32_t p = 0; p < k; p++){
 	
@@ -205,8 +205,7 @@ int main(int argc, char *argv[]){
 
 				if(t < k)//complete overlap
 					if(min_lcp >= threshold){
-						insert(Llocal[t], Next[t], p, lcp[i+1]); 
-						//inserts++;
+						insert(Llocal[t], Next[t], p, lcp[i+1]); inserts++;
 					}
         		}
 		}
@@ -222,7 +221,7 @@ int main(int argc, char *argv[]){
 	//GLOBAL solution (reusing)	
 	
 	#if OMP
-		#pragma omp parallel for //reduction(+:removes) 
+		#pragma omp parallel for reduction(+:removes) 
 	#endif
 	for(uint32_t t = 0; t < k; t++){
 
@@ -238,7 +237,7 @@ int main(int argc, char *argv[]){
 			while(Lg!=NULL){
 				if(Lg->value > min_lcp) remove(&Lg);
 				else break;
-				//removes++;
+				removes++;
 	        	}
 	
 			if(Llocal[t].find(p)!=Llocal[t].end()){
@@ -274,7 +273,7 @@ int main(int argc, char *argv[]){
 	int contained=0;
 	//contained suffixes
 	#if OMP
-		#pragma omp parallel for //reduction(+:contained) //firstprivate(threshold,n,k) 
+		#pragma omp parallel for reduction(+:contained) //firstprivate(threshold,n,k) 
 	#endif
 	for(uint32_t p = 0; p < k; p++){
 
@@ -289,7 +288,7 @@ int main(int argc, char *argv[]){
 			if(lcp[q] >= threshold){
 			
 				uint32_t tt=str_int[sa[q]+lcp[q]]-1;
-				//contained++;
+				contained++;
 
 				#if RESULT 
 					result[tt][Prefix[p]] = lcp[q];
