@@ -97,7 +97,8 @@ int main(int argc, char *argv[]){
 	#endif
 
  	string dir = ".";
-    	string id = "tmp."+to_string(k);
+    	string id = c_file;
+	id += "."+to_string(k);
     	cache_config m_config(true, dir, id);
 
 	store_to_cache(str_int, conf::KEY_TEXT_INT, m_config);

@@ -119,7 +119,8 @@ int main(int argc, char *argv[]){
 	#endif
 
  	string dir = ".";
-    	string id = "tmp."+to_string(k);
+    	string id = c_file;
+	id += "."+to_string(k);
     	cache_config m_config(true, dir, id);
 
 	store_to_cache(str_int, conf::KEY_TEXT_INT, m_config);
@@ -206,7 +207,9 @@ int main(int argc, char *argv[]){
 
 				if(t < k)//complete overlap
 					if(min_lcp >= threshold){
-						insert(Llocal[t], Next[t], p, lcp[i+1]); inserts++;
+						#pragma omp critical
+						insert(Llocal[t], Next[t], p, lcp[i+1]); 
+						inserts++;
 					}
         		}
 		}
@@ -380,22 +383,19 @@ int main(int argc, char *argv[]){
 inline void insert(tML& Llocal, tMLL& Next,int p, int value){
 
 	Tl *aux;
-   	aux = new Tl;
-   	aux->value = value;
-    	aux->prox = NULL;    
+	aux = new Tl;
+	aux->value = value;
+	aux->prox = NULL;    
 
-	#pragma omp critical
-	{
-		if(Next.find(p)!=Next.end() ){
+	if(Next.find(p)!=Next.end() ){
 	
-			*(Next[p]) = aux;
-		}
-		else{ //first element
-	
-			Llocal[p] = aux;
-		}
-		Next[p] = &(aux->prox);
+		*(Next[p]) = aux;
 	}
+	else{ //first element
+	
+		Llocal[p] = aux;
+	}
+	Next[p] = &(aux->prox);	
 }
 
 inline void remove(Tl **list){

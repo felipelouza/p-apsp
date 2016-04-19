@@ -1,7 +1,7 @@
 # ignore objects and archives, anywhere in the tree.
 *.[oa]
-main
-old_algorithm 
+p-apsp
+apsp
 suffix_array_solution_prac
 strip
 *.swp
