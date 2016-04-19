@@ -41,7 +41,7 @@ suffix_array_solution_prac: external/suffix_array_solution_prac.cpp ${LIBOBJ}
 lib: lib/file.o 
 	$(MY_CXX) -c lib/file.c -o lib/file.o 
 
-main: lib main.cpp
+main: lib main.cpp ${LIBOBJ}
 	$(MY_CXX) $(CXX_FLAGS) main.cpp $(CCLIB) -o main ${LIBOBJ} 
 
 old_algorithm: lib old_algorithm.cpp
