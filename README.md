@@ -2,10 +2,9 @@
 
 This code is an implementation of a new (parallel) algorithm to solve the All-pairs suffix-prefix problem.
 
-#files:
+**main.cpp**: parallel version.
 
-main.cpp: parallel version.
-apsp.cpp: sequential version (JDA's submission).
+**apsp.cpp**: sequential version (JDA's submission).
 
 #run:
 
