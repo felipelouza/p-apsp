@@ -237,7 +237,7 @@ int main(int argc, char *argv[]){
 
 	#if SAVE_SPACE
 		
-		/**/
+		#if DEBUG
 		uint32_t i = 0;
 		for (tVMII::iterator it_row=result.begin(); it_row!=result.end(); ++it_row){			
 			uint32_t j = 0;
@@ -250,7 +250,7 @@ int main(int argc, char *argv[]){
 				if(i++ > 10) break;
 			}
 		}
-		/**/
+		#endif
 
 		if(output==1){
                         ofstream out_file("output."+id+".seq.bin",ios::out | ios::binary);              
@@ -261,11 +261,13 @@ int main(int argc, char *argv[]){
 		}
 	#else
 
+		#if DEBUG
 		for(uint32_t i=0; i<10 && i<k; ++i){
 			for(uint32_t j=0; j<10 && j<k; ++j)
 				cout<<result[i][j]<<" ";
 			cout<<endl;
 		}
+		#endif
 
 		if(output==1){
                         ofstream out_file("output."+id+".seq.bin",ios::out | ios::binary);              
