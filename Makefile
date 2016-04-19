@@ -31,49 +31,49 @@ OUTPUT = 0
 T = 4 # n_threads
 ####
 
-all: main
-#suffix_array_solution_prac 
+all: p-apsp apsp
+#suffix_array_solution_prac
 
 suffix_array_solution_prac: external/suffix_array_solution_prac.cpp ${LIBOBJ}
 	$(MY_CXX) $(CXX_FLAGS) external/suffix_array_solution_prac.cpp $(CCLIB) -o external/suffix_array_solution_prac  
 
-#lib/file.o
 lib: lib/file.o 
 	$(MY_CXX) -c lib/file.c -o lib/file.o 
 
-main: lib main.cpp ${LIBOBJ}
-	$(MY_CXX) $(CXX_FLAGS) main.cpp $(CCLIB) -o main ${LIBOBJ} 
+p-apsp: lib main.cpp ${LIBOBJ}
+	$(MY_CXX) $(CXX_FLAGS) main.cpp $(CCLIB) -o p-apsp ${LIBOBJ} 
 
-old_algorithm: lib old_algorithm.cpp
-	$(MY_CXX) $(CXX_FLAGS) old_algorithm.cpp $(CCLIB) -o old_algorithm  ${LIBOBJ} 
+apsp: lib apsp.cpp
+	$(MY_CXX) $(CXX_FLAGS) apsp.cpp $(CCLIB) -o apsp  ${LIBOBJ} 
 
 strip: utils/strip.cpp
 	$(MY_CXX) utils/strip.cpp -o utils/strip
 
 clean:
 	rm external/suffix_array_solution_prac -f
-	rm main -f
+	rm external/malloc_count/malloc_count.o -f
+	rm p-apsp -f
+	rm apsp -f
 	rm *.bin -f
 	rm lib/*.o -f
 	rm *.sdsl -f
 
 run: run_main 
-#run_suff 
 
 run_suff: 
 	external/suffix_array_solution_prac $(DIR) $(INPUT) $(K) $(L) $(OUTPUT)
 	
 run_main: 
-	./main $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
+	./p-apsp $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
 	
-run_old: 
-	./old_algorithm $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
+run_apsp: 
+	./apsp $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
 
 run_strip: 
 	utils/strip $(INPUT) $(K)
 	
 valgrind: 
-	valgrind --tool=memcheck --leak-check=full --track-origins=yes ./main $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
+	valgrind --tool=memcheck --leak-check=full --track-origins=yes ./p-apsp $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
 
 diff:
 	ls -lh $(DIR)output.tmp.$(K).*.bin

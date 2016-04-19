@@ -17,7 +17,7 @@
 
 #include <omp.h>
 
-#define DEBUG 1
+#define DEBUG 0
 #define SAVE_SPACE 1 
 
 using namespace std;
@@ -73,11 +73,10 @@ int main(int argc, char *argv[]){
 	}	
 	str_int[l]=0;
 
-/*
-	for(uint32_t i=0; i<n; i++)
-		cout<<str_int[i]<<"|";
-	cout<<endl;
-*/
+	//free memory
+	for(uint32_t i=0; i<k; i++)
+		free(R[i]);
+	free(R);
 
 	uint32_t threshold;
 	sscanf(argv[4], "%u", &threshold);

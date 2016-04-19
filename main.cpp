@@ -16,7 +16,7 @@
 
 #include <omp.h>
 
-#define DEBUG 1
+#define DEBUG 0
 #define SAVE_SPACE 1
 #define OMP 1
 
