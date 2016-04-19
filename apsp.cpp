@@ -80,6 +80,7 @@ int main(int argc, char *argv[]){
 
 	uint32_t threshold;
 	sscanf(argv[4], "%u", &threshold);
+	printf("L: %d\n", threshold);
 
 	uint32_t output;
 	sscanf(argv[5], "%u", &output);
