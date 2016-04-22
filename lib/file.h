@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <inttypes.h>
 
-
+#include "utils.h"
 #define END_MARKER 0
 
 /*******************************************************************/
@@ -20,8 +20,9 @@ int file_close(FILE* f_in);
 size_t file_size(FILE* f_in);
 
 char* file_load(FILE* f_in) ;
-char** file_load_multiple(char* c_file, int k, uint32_t* n) ;
+char** file_load_multiple(char* c_file, uint_t k, uint_t* n) ;
 
+void mkdir(const char* c_file);
 /*******************************************************************/
 
 

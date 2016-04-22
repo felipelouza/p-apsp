@@ -96,7 +96,8 @@ int main(int argc, char *argv[]){
 		cout<<"SAVE_SPACE"<<endl;
 	#endif
 
- 	string dir = ".";
+ 	string dir = "sdsl";
+	mkdir(dir.c_str());
     	string id = c_file;
 	id += "."+to_string(k);
     	cache_config m_config(true, dir, id);
@@ -255,7 +256,7 @@ int main(int argc, char *argv[]){
 		#endif
 
 		if(output==1){
-                        ofstream out_file("output."+id+".seq.bin",ios::out | ios::binary);              
+			ofstream out_file(dir+"/output."+id+".seq.bin",ios::out | ios::binary);			
 			for (tVMII::iterator it_row=result.begin(); it_row!=result.end(); ++it_row)
 				for(tMII::iterator it_column=it_row->begin(); it_column!=it_row->end(); ++it_column)
 					out_file.write((char*)&it_column->second, sizeof(uint32_t));
@@ -272,7 +273,7 @@ int main(int argc, char *argv[]){
 		#endif
 
 		if(output==1){
-                        ofstream out_file("output."+id+".seq.bin",ios::out | ios::binary);              
+			ofstream out_file(dir+"/output."+id+".seq.bin",ios::out | ios::binary);			
 			for(uint32_t i=0; i<k; ++i)
 				for(uint32_t j=0; j<k; ++j)
 					out_file.write((char*)&result[i][j], sizeof(uint32_t));

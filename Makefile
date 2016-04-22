@@ -5,12 +5,13 @@ LIB_DIR = ${HOME}/lib
 INC_DIR = ${HOME}/include
 MY_CXX_FLAGS= -std=c++11 -Wall -Wextra  -DNDEBUG $(CODE_COVER)
 MY_CXX_OPT_FLAGS= -O3 -ffast-math -funroll-loops -m64 -fomit-frame-pointer -D_FILE_OFFSET_BITS=64
-#MY_CXX_OPT_FLAGS= -m64 -fomit-frame-pointer -D_FILE_OFFSET_BITS=64
+#MY_CXX_OPT_FLAGS= $(VLIB)
 MY_CXX=g++
 
 LFLAGS = -lm -ldl
 
 LIBOBJ = external/malloc_count/malloc_count.o\
+	 lib/utils.o\
 	 lib/file.o
 
 CXX_FLAGS=$(MY_CXX_FLAGS) $(MY_CXX_OPT_FLAGS) -I$(INC_DIR) -L$(LIB_DIR) $(LFLAGS)
@@ -20,13 +21,12 @@ CLAGS= -DSYMBOLBYTES=1
 ####
 
 #DIR = ~/dataset/ests/
-#INPUT = all_ests.fasta
 
-DIR = ~/dataset/reads/
-INPUT = Vr6_L001_R1.clipped.fastq
+DIR = ~/dataset/
+INPUT = all_ests.fasta
 
 K = 4 
-L = 1 # min_lcp
+L = 10 # min_lcp
 OUTPUT = 0
 T = 4 # n_threads
 ####
@@ -80,6 +80,6 @@ diff:
 	diff $(DIR)output.tmp.$(K).seq.bin $(DIR)output.tmp.$(K).par.bin 
 
 remove:
-	rm $(DIR)*.sdsl
-	rm $(DIR)*.bin
+	rm $(DIR)sdsl/*.sdsl
+	rm $(DIR)sdsl/*.bin
 

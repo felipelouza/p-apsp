@@ -4,6 +4,8 @@ p-apsp
 apsp
 suffix_array_solution_prac
 strip
+utils_32.h
+utils_64.h
 *.swp
 *.swo
 *.sdsl

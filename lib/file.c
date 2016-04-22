@@ -81,11 +81,11 @@ return c_buffer;
 /*******************************************************************/
 
 // read line by line
-char** load_multiple_txt(FILE* f_in, int k, uint32_t *n) {
+char** load_multiple_txt(FILE* f_in, uint_t k, uint_t *n) {
 
 	char **c_buffer = (char**) malloc(k*sizeof(char*));
 
-	int i;
+	uint_t i;
  	for(i=0; i<k; i++){
 		size_t len = 0;
 		c_buffer[i] = NULL;
@@ -104,11 +104,11 @@ return c_buffer;
 }
 
 // read sequences separeted by '@' line
-char** load_multiple_fastq(FILE* f_in, int k, uint32_t *n){
+char** load_multiple_fastq(FILE* f_in, uint_t k, uint_t *n){
 
 	char **c_buffer = (char**) malloc(k*sizeof(char*));
 
-	int i;
+	uint_t i;
  	for(i=0; i<k; i++){
 
                 size_t len = 0;
@@ -134,7 +134,7 @@ return c_buffer;
 }
 
 // read sequences separeted by '>' line
-char** load_multiple_fasta(FILE* f_in, int k, uint32_t *n){
+char** load_multiple_fasta(FILE* f_in, int_t k, uint_t *n){
 
 	char **c_buffer = (char**) malloc(k*sizeof(char*));
 
@@ -144,8 +144,8 @@ char** load_multiple_fasta(FILE* f_in, int k, uint32_t *n){
 	getline(&buf, &len, f_in);// first sequence
 	free(buf);
 
-	int count=0;
-	int i;
+	int_t count=0;
+	int_t i;
  	for(i=0; i<k; i++){
 
 		if(i!=count) return 0;
@@ -154,7 +154,7 @@ char** load_multiple_fasta(FILE* f_in, int k, uint32_t *n){
 		int nalloc = 128;
 		c_buffer[i] = (char*) malloc(nalloc*sizeof(char));
 
-		uint32_t p=0;
+		uint_t p=0;
 		while(getline(&buf, &len, f_in)!=-1){
 
 			if(buf[0] == '>'){
@@ -182,7 +182,7 @@ return c_buffer;
 
 /*******************************************************************/
 
-char** file_load_multiple(char* c_file, int k, uint32_t *n) {
+char** file_load_multiple(char* c_file, uint_t k, uint_t *n) {
 
 /* .ext
  * .txt   - strings per line
@@ -208,6 +208,21 @@ char** file_load_multiple(char* c_file, int k, uint32_t *n) {
 	fclose(f_in);
 
 return c_buffer;
+}
+
+/**********************************************************************/
+
+void mkdir(const char* c_file){
+	
+//	printf("mkdir: %s\n", c_file);
+	
+	char c_aux[500];
+	
+	strcpy (c_aux,"mkdir -p ");
+	strcat (c_aux, c_file);
+			
+	system (c_aux);//remove .bin
+	
 }
 
 /*******************************************************************/
