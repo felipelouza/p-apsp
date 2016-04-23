@@ -225,10 +225,11 @@ int main(int argc, char *argv[]){
 		start = omp_get_wtime();
 	#endif
 
+	uint_t overlaps=0;
 	//GLOBAL solution (reusing)	
 	
 	#if OMP
-		#pragma omp parallel for reduction(+:removes) 
+		#pragma omp parallel for reduction(+:removes) reduction(+:overlaps) 
 	#endif
 	for(uint_t t = 0; t < k; t++){
 
@@ -237,38 +238,43 @@ int main(int argc, char *argv[]){
 		uint_t min_lcp;
 		Tl *Lg = NULL;
 
-		for(uint_t p = 0; p < k; ++p){
-	
-			min_lcp = Min_lcp[p];
-				
-			while(Lg!=NULL){
-				if(Lg->value > min_lcp) remove(&Lg);
-				else break;
-				removes++;
-	        	}
-	
-			if(Llocal[t].find(p)!=Llocal[t].end()){
+		if(!Llocal[t].empty()){
 
-				if(Lg) prepend(&Lg, Next[t], Llocal[t], p);
-				else Lg = Llocal[t][p];
+			for(uint_t p = 0; p < k; ++p){
+		
+				min_lcp = Min_lcp[p];
+					
+				while(Lg!=NULL){
+					if(Lg->value > min_lcp) remove(&Lg);
+					else break;
+					removes++;
+		        	}
+		
+				if(Llocal[t].find(p)!=Llocal[t].end()){
+	
+					if(Lg) prepend(&Lg, Next[t], Llocal[t], p);
+					else Lg = Llocal[t][p];
+				}
+	
+				if(Lg){
+				#if SAVE_SPACE
+					if(t!=Prefix[p])
+				#endif
+				#if RESULT
+					result[t][Prefix[p]] = Lg->value;
+				#else
+					result[Prefix[p]][t] = Lg->value;
+				#endif
+					overlaps++;
+				}
+	
 			}
-
-			if(Lg)
-			#if SAVE_SPACE
-				if(t!=Prefix[p])
-			#endif
-			#if RESULT
-				result[t][Prefix[p]] = Lg->value;
-			#else
-				result[Prefix[p]][t] = Lg->value;
-			#endif
-
+	
+			//free	
+			while(Lg!=NULL){
+				remove(&Lg);
+		        }
 		}
-
-		//free	
-		while(Lg!=NULL){
-			remove(&Lg);
-	        }
 	}
 
 	#if OMP
@@ -321,10 +327,10 @@ int main(int argc, char *argv[]){
 		fprintf(stderr, "%lf\n", omp_get_wtime()-total);
 	#endif
 
+	cout<<"--"<<endl;
    	printf("inserts %" PRIdN "\n", inserts);
 	printf("removes %" PRIdN "\n", removes);
-   	printf("contained %" PRIdN "\n", contained);
-
+        printf("overlaps %" PRIdN " (%" PRIdN ")\n", overlaps, contained);
 	cout<<"--"<<endl;
 
 
