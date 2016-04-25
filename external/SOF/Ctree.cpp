@@ -246,13 +246,13 @@ void find_all_pairs(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulong startpo
   double load = 0;
   for(ulong z=0;z<k-1;z++){
     int len=startpos[z+1]-startpos[z]-1;
-    //std::cerr<<"len:"<<len<<std::endl;
+    //std::cout<<"len:"<<len<<std::endl;
     load+=(len * (len+1)/2);
-    //cerr<<load<<endl;
+    //cout<<load<<endl;
   }
   load += (N-startpos[k-1]) *(N-startpos[k-1]-1)/2; 
   double share_p = load/threads;
-  //  cerr << "Processor Share:"<<share_p<<endl;
+  //  cout << "Processor Share:"<<share_p<<endl;
   // End calculating
 
 
@@ -272,7 +272,7 @@ void find_all_pairs(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulong startpo
       
     }
     else{
-      //cerr << p_counter<<" "<<share_temp<<endl;
+      //cout << p_counter<<" "<<share_temp<<endl;
       end_p[p_counter++]=z-1;
       start_p[p_counter]=z;
       share_temp=(len * (len+1)/2);
@@ -298,12 +298,12 @@ void find_all_pairs(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulong startpo
   // End Calculating...
   /*
   for(int z=0;z<threads;z++)
-    cerr<<"Processor:"<<z<<" start:"<<start_p[z]<<" end:"<<end_p[z]<<endl;
+    cout<<"Processor:"<<z<<" start:"<<start_p[z]<<" end:"<<end_p[z]<<endl;
   */
 
 
 
-  //std::cerr<<"load:"<<load<<std::endl;
+  //std::cout<<"load:"<<load<<std::endl;
 
 
   double starttime,endtime;
@@ -322,7 +322,8 @@ void find_all_pairs(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulong startpo
 
   endtime = omp_get_wtime();  
 
-  cerr<<"User Time for finding all pairs using brute force: "<<endtime-starttime<<endl;
+  cout<<"User Time for finding all pairs using brute force: "<<endtime-starttime<<endl;
+  fprintf(stderr, "%lf\n", endtime-starttime);
 
 
   if (output==1){
@@ -408,7 +409,8 @@ void find_all_pairs_modified(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulon
   }
 
   stopwatch.stop();  
-  cerr<<"User Time for finding all pairs using three-pointers method: "<<stopwatch.getUserTime()<<" ms"<<endl;
+  cout<<"User Time for finding all pairs using three-pointers method: "<<stopwatch.getUserTime()<<" ms"<<endl;
+  fprintf(stderr, "%lf\n", stopwatch.getUserTime());
 
   if (output==1){
     for (uint z=0;z<k;z++){

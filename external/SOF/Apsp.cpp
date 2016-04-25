@@ -8,6 +8,7 @@
 #include "Ctree.h"
 #include <stdio.h>
 #include <string.h>
+#include "../malloc_count/malloc_count.h"
 
 
 
@@ -66,12 +67,12 @@ void APSP(char *filename, char *output, char* sorting,int threads,int min,int di
 			file.read (memblock, size/BUFFER);
 			for(ulong z=0;z<size/BUFFER;z++){
 				if (memblock[z]!=SEPERATOR){
-					//cerr <<"encoding:"<<memblock[z]<<" pos:"<<pos<<endl;
+					//cout <<"encoding:"<<memblock[z]<<" pos:"<<pos<<endl;
 					encode(text,pos,bitnum,memblock[z]);
 					if (memblock[z]=='A' || memblock[z]=='C' || memblock[z]=='G' || memblock[z]=='T') {
 						counter++;
 						bitnum+=2;
-						//cerr<<"bitnum now "<<bitnum<<endl;
+						//cout<<"bitnum now "<<bitnum<<endl;
 						if (bitnum==9) {
 							bitnum=1;
 							pos++;
@@ -85,7 +86,7 @@ void APSP(char *filename, char *output, char* sorting,int threads,int min,int di
 			}
 		}
 
-		//cerr <<"reminder:"<<reminder<<endl;
+		//cout <<"reminder:"<<reminder<<endl;
 		if (reminder>0){
 			file.seekg (BUFFER*(size/BUFFER), std::ios::beg);
 			file.read (memblock, reminder);
@@ -114,20 +115,20 @@ void APSP(char *filename, char *output, char* sorting,int threads,int min,int di
 		
 		N = counter;
 		file.close();
-		cerr<<"Size of File:" << size << endl;
-		cerr<<"Number of Strings: K "<< counterk<<endl;
-		cerr <<"Size of strings:" << counter <<endl;
+		cout<<"Size of File:" << size << endl;
+		cout<<"Number of Strings: K "<< counterk<<endl;
+		cout <<"Size of strings:" << counter <<endl;
 		K=counterk;
 
 		/* decoding code
 		for(int i=0;i<counterk;i++){
-			//cerr << "start" <<i<< ":"<<startS[i]<<endl;
+			//cout << "start" <<i<< ":"<<startS[i]<<endl;
 			for(ulong z=startS[i];z<startS[i+1];z++){				
 				char v= decode(text,z);
-				//cerr<<"decoding byte "<<bbyte<<" bit "<<bbit<<" "<<v <<endl;
-				//cerr<<v;
+				//cout<<"decoding byte "<<bbyte<<" bit "<<bbit<<" "<<v <<endl;
+				//cout<<v;
 			}
-			//cerr <<SEPERATOR;
+			//cout <<SEPERATOR;
 		}*/
 
 		
@@ -137,7 +138,7 @@ void APSP(char *filename, char *output, char* sorting,int threads,int min,int di
   
   /*
     for(uint u=0;u<K;u++)
-    cerr<<"Sorted:"<<Sorted[u]<<endl; */
+    cout<<"Sorted:"<<Sorted[u]<<endl; */
   struct tree_node *ptr;
 	
   sdsl::stop_watch stopwatch;
@@ -146,30 +147,30 @@ void APSP(char *filename, char *output, char* sorting,int threads,int min,int di
     stopwatch.start();
     msd(text,0, K, 0,Sorted);
     stopwatch.stop();  
-    cerr<<"User Time for Sorting: "<<stopwatch.getUserTime()<<" ms"<<endl;
+    cout<<"User Time for Sorting: "<<stopwatch.getUserTime()<<" ms"<<endl;
     //print(text);
     //print_Sorted(text,Sorted);
     stopwatch.start();
-    cerr<<"Creating tree After Sorting: "<<endl;
+    cout<<"Creating tree After Sorting: "<<endl;
     ptr=create_tree(text,K,N,startS,Sorted);
 	
     stopwatch.stop();
-    cerr<<"User Time for Constructing tree: "<<stopwatch.getUserTime()<<" ms"<<endl;
+    cout<<"User Time for Constructing tree: "<<stopwatch.getUserTime()<<" ms"<<endl;
 	
-    //cerr<<"displaying tree "<<endl;
+    //cout<<"displaying tree "<<endl;
     //display_tree(ptr);
   }else {
 
     sdsl::stop_watch stopwatch;
     stopwatch.start();
-    cerr<<"Creating tree: "<<endl;
+    cout<<"Creating tree: "<<endl;
 	
     ptr=create_tree_modified(text,K,N,startS,matched);
     int counter1=0;
     traverse_tree_modified(ptr,Sorted,&counter1,matched);
     stopwatch.stop();
-    cerr<<"User Time for Constructing tree with no sorting required: "<<stopwatch.getUserTime()<<" ms"<<endl;
-    //cerr<<"displaying tree: "<<endl;
+    cout<<"User Time for Constructing tree with no sorting required: "<<stopwatch.getUserTime()<<" ms"<<endl;
+    //cout<<"displaying tree: "<<endl;
     //display_tree(ptr);
     //print(text);
     //print_Sorted(text,Sorted);
@@ -183,8 +184,8 @@ void APSP(char *filename, char *output, char* sorting,int threads,int min,int di
     //}
 
 
-  cerr<<"Press any key to continue: ";
-  cin >>N;
+  cout<<"Press any key to continue: "<<endl;
+//  cin >>N;
 
   // Clean up    
   delete [] startS;
@@ -206,7 +207,7 @@ int main(int argc,char *argv[])
   sorting[0]='0';
   
   if (argc<2){
-      cerr <<"wrong number of arguments, run Apsp to get a help"<<endl;
+      cout <<"wrong number of arguments, run Apsp to get a help"<<endl;
       displayhelp();
       return 0;
   }
@@ -234,8 +235,8 @@ int main(int argc,char *argv[])
 
   /*
   if (argc!=6){
-    cerr <<"wrong number of arguments"<<endl;
-    cerr <<"Apsp filename output sorting threads distribution_method"<<endl;
+    cout <<"wrong number of arguments"<<endl;
+    cout <<"Apsp filename output sorting threads distribution_method"<<endl;
     return 0;
     }*/
   
@@ -250,7 +251,7 @@ void msd(uchar *a, int l, int r, int d, uint *So)
   int *temp = new int[K];
 	
 
-  //cerr << "l , r :"<<l<< " "<< r <<endl;
+  //cout << "l , r :"<<l<< " "<< r <<endl;
   if (r <= l+1) {
     delete temp;
     return;
@@ -263,7 +264,7 @@ void msd(uchar *a, int l, int r, int d, uint *So)
     if (startS[So[i]]+ d >= N)
       count[0]++;
     else if (startS[So[i]]+ d < startS[So[i]+1]/*-1*/) {
-	  //cerr << "decode(a,startS[So[i]]+d):"<<decode(a,startS[So[i]]+d) << endl;
+	  //cout << "decode(a,startS[So[i]]+d):"<<decode(a,startS[So[i]]+d) << endl;
       count[choose_index(decode(a,startS[So[i]]+d)/*a[startS[So[i]]+d]*/)]++;
 	} else
       count[0]++;
@@ -274,11 +275,11 @@ void msd(uchar *a, int l, int r, int d, uint *So)
 	
   /*
   for (int k = 0; k <5 ; k++)
-    cerr<<"count k Before:"<<count[k]<<endl;
+    cout<<"count k Before:"<<count[k]<<endl;
 	*/
 
   for (int i = l; i < r; i++){
-    //cerr<<"choose:"<<choose_index(a[startS[So[i]]+d])<<endl;
+    //cout<<"choose:"<<choose_index(a[startS[So[i]]+d])<<endl;
     if (startS[So[i]]+ d >= N) {
       temp[count[0]-1+l]=So[i];
       count[0]--;
@@ -286,7 +287,7 @@ void msd(uchar *a, int l, int r, int d, uint *So)
     else if (startS[So[i]]+ d < startS[So[i]+1]/*-1*/){
       temp[count[choose_index(/*a[startS[So[i]]+d]*/ decode(a, startS[So[i]]+d))]-1+l] = So[i];
       count[choose_index(/*a[startS[So[i]]+d]*/  decode(a, startS[So[i]]+d))]--;
-      //cerr <<"i , So[i]:" << i <<" "<<So[i]<<endl;
+      //cout <<"i , So[i]:" << i <<" "<<So[i]<<endl;
     } else {
       temp[count[0]-1+l]=So[i];
       count[0]--;
@@ -299,17 +300,17 @@ void msd(uchar *a, int l, int r, int d, uint *So)
 	
   /*
     for (int i = l; i < r; i++)
-    cerr<<"So After:"<<So[i]<<endl;
+    cout<<"So After:"<<So[i]<<endl;
 
     for (int k = 0; k <5 ; k++)
-    cerr<<"count k After:"<<count[k]<<endl; 
+    cout<<"count k After:"<<count[k]<<endl; 
   */
   delete temp;
 
 	
 
 
-  //	cerr <<"-------------"<<endl;
+  //	cout <<"-------------"<<endl;
   for (int i = 1; i < 4; i++){
     msd(a,  l+ count[i],  l+ count[i+1], d+1,So);
   }
@@ -373,48 +374,48 @@ void print_Sorted(uchar *a,uint * So){
 
 
 void displayhelp(){
-  cerr<<"*******************************************************"<<endl;
-  cerr<<"This program has one parameter and four optional parameters:"<<endl;
-  cerr<<"Apsp_first filename [method] [number_of_processors] [output] [minimum_length]"<<endl;
-  cerr<<"filename\t is the name of the data file."<<endl;
-  cerr<<"-d\tdistribution method. Default value is 1."<<endl;
-  cerr<<"-p\tnumber of processors(threads). Default value is the maximum."<<endl;
-  cerr<<"-o\toutput:\n\t 1 (default) for producing an output in an array.\n\t 0 for executing without an output.\n\t 2 for outputing all overlaps."<<endl;
-  cerr<<"-m\tminimum length for matching, 1 is the default value."<<endl;
-  cerr<<"*******************************************************"<<endl;
+  cout<<"*******************************************************"<<endl;
+  cout<<"This program has one parameter and four optional parameters:"<<endl;
+  cout<<"Apsp_first filename [method] [number_of_processors] [output] [minimum_length]"<<endl;
+  cout<<"filename\t is the name of the data file."<<endl;
+  cout<<"-d\tdistribution method. Default value is 1."<<endl;
+  cout<<"-p\tnumber of processors(threads). Default value is the maximum."<<endl;
+  cout<<"-o\toutput:\n\t 1 (default) for producing an output in an array.\n\t 0 for executing without an output.\n\t 2 for outputing all overlaps."<<endl;
+  cout<<"-m\tminimum length for matching, 1 is the default value."<<endl;
+  cout<<"*******************************************************"<<endl;
 }
 
 
 void display_choices(char *filename, char *output, char* sorting,int threads,int min,int distribution_method){
 
-  cerr<<"These are your choices:"<<endl;
-  cerr<<"File name:"<<filename<<endl;
-  cerr<<"Output:";
+  cout<<"These are your choices:"<<endl;
+  cout<<"File name:"<<filename<<endl;
+  cout<<"Output:";
   if (output[0]=='0')
-    cerr<<" No Output" <<endl;
+    cout<<" No Output" <<endl;
   else if (output[0]=='1')
-    cerr<<" Maximum suffix-prefix matches are shown in two dimentional array."<<endl;
+    cout<<" Maximum suffix-prefix matches are shown in two dimentional array."<<endl;
   else
-    cerr<<" All overlaps are shown "<<endl;
+    cout<<" All overlaps are shown "<<endl;
 
 
-  cerr<<"Sorting: ";
+  cout<<"Sorting: ";
   if (sorting[0]=='0')
-    cerr <<" No Sorting"<<endl;
+    cout <<" No Sorting"<<endl;
   else 
-    cerr <<" with sorting"<<endl;
+    cout <<" with sorting"<<endl;
 
-  cerr<<"Number of threads:"<<threads<<endl;
-  cerr<<"Minimum Match Length:"<<min<<endl;
-  cerr<<"Distribution Method:";
+  cout<<"Number of threads:"<<threads<<endl;
+  cout<<"Minimum Match Length:"<<min<<endl;
+  cout<<"Distribution Method:";
  
   if (distribution_method==1)
-    cerr<<" Divide k strings equally between the processors"<<endl;
+    cout<<" Divide k strings equally between the processors"<<endl;
   else if (distribution_method==2)
-    cerr<<" Estimate an approximately equal share for each processor."<<endl;
+    cout<<" Estimate an approximately equal share for each processor."<<endl;
   else
-    cerr<<" Each processor starts with an initial share."<<endl;
-   cerr<<"----------------------"<<endl;
+    cout<<" Each processor starts with an initial share."<<endl;
+   cout<<"----------------------"<<endl;
 }
 
 void encode(uchar *final,ulong counter,int bitnum, char c){
