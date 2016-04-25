@@ -16,6 +16,9 @@ int main(int argc, char *argv[]){
   f1= fopen(argv[1],"r");
   f2= fopen(argv[2],"w");
 
+  int n;
+  sscanf(argv[3], "%d", &n);
+
 
   char i;
   int choice;
@@ -47,7 +50,7 @@ int main(int argc, char *argv[]){
 	fputc(choose_char(),f2);
 	counter++;
     }
-  }while (i!=EOF);
+  }while (i!=EOF && k<n);
   fputc(SEPERATOR,f2);
   fclose(f1);
   fclose(f2);
