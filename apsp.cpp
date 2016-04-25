@@ -41,7 +41,7 @@ inline void prepend(Tl **list1, Tl **list2, Tl***next, int n, Tl *sentinel);
 int main(int argc, char *argv[]){
 
 	uint32_t k = 0;
-	uint32_t n = 0;
+	uint_t n = 0;
 	uint32_t l = 0;
 	vector<uint32_t> ms;  // vector containing the length of the ests
 
@@ -229,7 +229,9 @@ int main(int argc, char *argv[]){
 	
 
 	cout<<"--"<<endl;
-	printf("CLOCK = %lf TIME = %lf (in seconds)\n", (clock() - c_start) / (double)(CLOCKS_PER_SEC), difftime (time(NULL),t_start));
+	double d_time = (clock() - c_start) / (double)(CLOCKS_PER_SEC);
+	printf("CLOCK = %lf TIME = %lf (in seconds)\n", d_time, difftime (time(NULL),t_start));
+	fprintf(stderr, "%lf\n", d_time);
 	cout<<"--"<<endl;
 
    	printf("inserts %i\n", inserts);
