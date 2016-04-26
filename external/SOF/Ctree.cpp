@@ -6,6 +6,7 @@
 using namespace std;
 
 
+
 struct tree_node *create_tree(uchar *text,uint k,ulong n, ulong startp[],uint sorted[]){
   struct tree_node *root=create_node(0,0,0);
   for(uint i=0;i<k;i++){
@@ -229,7 +230,9 @@ void find_all_pairs(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulong startpo
 		    ,int threads,int distribution_method,int min){
   int **A;
  
+  tVMII result(k);
 
+  /*
   if (output==1){
     A= new int*[k];
     for (uint z=0;z<k;z++)
@@ -240,7 +243,7 @@ void find_all_pairs(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulong startpo
 	A[z][z1]=0;
     }
   }
-
+  */
  
   // calculate the total load
   double load = 0;
@@ -310,14 +313,14 @@ void find_all_pairs(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulong startpo
   starttime = omp_get_wtime();
 
   if (threads==1)
-     distribute_seq(threads,T,startpos,sorted,A,ptr,k,N,output,min);
+     distribute_seq(threads,T,startpos,sorted,A,result,ptr,k,N,output,min);
 
   else if (distribution_method==2)
-    distribute_k_2(threads,start_p,end_p,T,startpos,sorted,A,ptr,k,N,output,min);
+    distribute_k_2(threads,start_p,end_p,T,startpos,sorted,A,result,ptr,k,N,output,min);
   else if (distribution_method==1)
-    distribute_k_1(threads,T,startpos,sorted,A,ptr,k,N,output,min);
+    distribute_k_1(threads,T,startpos,sorted,A,result,ptr,k,N,output,min);
   else
-    distribute_k_3(threads,T,startpos,sorted,A,ptr,k,N,output,min);
+    distribute_k_3(threads,T,startpos,sorted,A,result,ptr,k,N,output,min);
 
 
   endtime = omp_get_wtime();  
@@ -332,7 +335,7 @@ void find_all_pairs(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulong startpo
 	if (z==z1)
 	  printf("%5d ",0);
 	else
-	  printf("%5d ",A[z][z1]);
+	  printf("%5d ",result[z][z1]);
       }
       cout <<endl;
     }
@@ -389,6 +392,9 @@ struct stack_node* create_stack_node(uint i,struct stack_node *ptr){
 void find_all_pairs_modified(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulong startpos[],uint sorted[],int output){
   int **A;
 
+  tVMII result(k);
+
+  /*
   if (output==1){
     A= new int*[k];
     for (uint z=0;z<k;z++)
@@ -399,13 +405,13 @@ void find_all_pairs_modified(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulon
 	A[z][z1]=0;
     }
   }
-
+  */
 
   sdsl::stop_watch stopwatch;
   stopwatch.start();
 
   for(int i=1;i<5;i++){
-    if (ptr->ptr[i]!=NULL)	traversal1(ptr->ptr[i],A,ptr,T,0,0,startpos,sorted,N,k,output);
+    if (ptr->ptr[i]!=NULL)	traversal1(ptr->ptr[i],A, result,ptr,T,0,0,startpos,sorted,N,k,output);
   }
 
   stopwatch.stop();  
@@ -418,7 +424,8 @@ void find_all_pairs_modified(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulon
 	if (z==z1)
 	  printf("%5d ",0);
 	else
-	  printf("%5d ",A[z][z1]);
+//	  printf("%5d ",A[z][z1]);
+	  printf("%5d ",result[z][z1]);
       }
       cout <<endl;
     }
@@ -429,20 +436,20 @@ void find_all_pairs_modified(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulon
 
 
 
-void traversal1(struct tree_node *ptr,int **A,struct tree_node *root,uchar *T,int curpos,int curpos2,ulong startpos[],uint sorted[],ulong N,ulong k,int output){
+void traversal1(struct tree_node *ptr,int **A, tVMII& result,struct tree_node *root,uchar *T,int curpos,int curpos2,ulong startpos[],uint sorted[],ulong N,ulong k,int output){
 	
   //cout<<"Outer from:"<<ptr->from<<" to:"<<ptr->to<< endl;
   for(int i=0;i<=ptr->pos;i++){
-    traversal2(root->ptr[get_index(T[startpos[sorted[ptr->from]]+curpos])],0,ptr,i,T,curpos,curpos2,k,N,startpos,sorted,A,output);
+    traversal2(root->ptr[get_index(T[startpos[sorted[ptr->from]]+curpos])],0,ptr,i,T,curpos,curpos2,k,N,startpos,sorted,A, result,output);
     curpos++;
   }
 
   for(int n=1;n<=4;n++){
-    if (ptr->ptr[n]!=NULL) traversal1(ptr->ptr[n],A,root,T,curpos,0,startpos,sorted,N,k,output);
+    if (ptr->ptr[n]!=NULL) traversal1(ptr->ptr[n],A,result,root,T,curpos,0,startpos,sorted,N,k,output);
   }
 }
 
-void traversal2(struct tree_node* ptr2,int i2,struct tree_node *ptr1,int i1,uchar * T,int curpos,int curpos2,uint k,int N,ulong startpos[],uint sorted[],int **A,int output){
+void traversal2(struct tree_node* ptr2,int i2,struct tree_node *ptr1,int i1,uchar * T,int curpos,int curpos2,uint k,int N,ulong startpos[],uint sorted[],int **A, tVMII& result,int output){
 	
   if (ptr2==NULL) return;
   for (int n=i1;n<=ptr1->pos;n++){
@@ -461,7 +468,7 @@ void traversal2(struct tree_node* ptr2,int i2,struct tree_node *ptr1,int i1,ucha
 
   for(int n=1;n<=4;n++){
     if (ptr1->ptr[n]!=NULL){
-      traversal2(ptr2,i2,ptr1->ptr[n],0,T,curpos,curpos2,k,N,startpos,sorted,A,output);
+      traversal2(ptr2,i2,ptr1->ptr[n],0,T,curpos,curpos2,k,N,startpos,sorted,A,result,output);
     }
   }
 
@@ -470,14 +477,19 @@ void traversal2(struct tree_node* ptr2,int i2,struct tree_node *ptr1,int i1,ucha
     //cout<< "Report a match!"<<endl;
     for(int z=ptr1->from;z<=ptr1->to;z++){
       //cout << "curpos2:" <<curpos2<<endl;
-      if (output==1){
+//      if (output==1){
 	for(int z1=ptr2->from;z1<=ptr2->to;z1++){ 
-	  if (A[sorted[z]][sorted[z1]]==0 && z1!=z){
+/*	  if (A[sorted[z]][sorted[z1]]==0 && z1!=z){
 	    //cout << "set value "<<z1<<" "<<z<<endl; 
 	    A[sorted[z]][sorted[z1]]= curpos2;
 	  }
+*/
+	  if (result[sorted[z]][sorted[z1]]==0 && z1!=z){
+	    //cout << "set value "<<z1<<" "<<z<<endl; 
+	    result[sorted[z]][sorted[z1]]= curpos2;
+	  }
 	}
-      }
+//      }
     }
     return;
   }	
@@ -485,7 +497,7 @@ void traversal2(struct tree_node* ptr2,int i2,struct tree_node *ptr1,int i1,ucha
 }
 
 
-void distribute_k_2(int threads,int start_p[],int end_p[],uchar *T,ulong startpos[],uint sorted[],int **A,struct  tree_node* ptr,ulong k,ulong N,int output,int min)
+void distribute_k_2(int threads,int start_p[],int end_p[],uchar *T,ulong startpos[],uint sorted[],int **A, tVMII& result,struct  tree_node* ptr,ulong k,ulong N,int output,int min)
 {
   omp_set_num_threads(threads);
 #pragma omp parallel 
@@ -499,7 +511,7 @@ void distribute_k_2(int threads,int start_p[],int end_p[],uchar *T,ulong startpo
 		int v=j;struct tree_node *curptr=ptr;int pos=1;int curpos=0;
 		while (1){
 			  if (v==next){  // There is a match
-				do_output_all_results(A,sorted,i,next-j,curptr,output,startpos);
+				do_output_all_results(A,result, sorted,i,next-j,curptr,output,startpos);
 				break;
 			  }
 
@@ -526,7 +538,7 @@ void distribute_k_2(int threads,int start_p[],int end_p[],uchar *T,ulong startpo
 
 /* this method will simply divide strings between processors */
 
-void distribute_k_1(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,struct  tree_node* ptr,ulong k,ulong N,int output,int min)
+void distribute_k_1(int threads,uchar *T,ulong startpos[],uint sorted[],int **A, tVMII& result,struct  tree_node* ptr,ulong k,ulong N,int output,int min)
 {
   omp_set_num_threads(threads);
   
@@ -539,7 +551,7 @@ void distribute_k_1(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
       ulong v=j;struct tree_node *curptr=ptr;ulong pos=1;ulong curpos=0;
       while (1){
 		if (/*T[v]==SEPERATOR*/ v==next){  // There is a match
-		  do_output_all_results(A,sorted,i,next-j,curptr,output,startpos);
+		  do_output_all_results(A,result,sorted,i,next-j,curptr,output,startpos);
 		  break;
 	    }
 
@@ -564,7 +576,7 @@ void distribute_k_1(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
 
 /* this method will simply divide strings between processors */
 
-void distribute_k_3(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,struct  tree_node* ptr,ulong k,ulong N,int output,int min)
+void distribute_k_3(int threads,uchar *T,ulong startpos[],uint sorted[],int **A, tVMII& result,struct  tree_node* ptr,ulong k,ulong N,int output,int min)
 {
 
   omp_set_num_threads(threads);
@@ -591,7 +603,7 @@ void distribute_k_3(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
 	  int v=j;struct tree_node *curptr=ptr;int pos=1;int curpos=0;
 	  while (1){
 	    if (v==next){  // There is a match
-	      do_output_all_results(A,sorted,i,next-j,curptr,output,startpos);
+	      do_output_all_results(A,result,sorted,i,next-j,curptr,output,startpos);
 	      break;
 	    }
 
@@ -618,7 +630,7 @@ void distribute_k_3(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
 
 }
 
-void distribute_seq(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,struct  tree_node* ptr,ulong k,ulong N,int output,int min)
+void distribute_seq(int threads,uchar *T,ulong startpos[],uint sorted[],int **A, tVMII& result,struct  tree_node* ptr,ulong k,ulong N,int output,int min)
 {
 
   
@@ -631,7 +643,7 @@ void distribute_seq(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
       int v=j;struct tree_node *curptr=ptr;int pos=1;int curpos=0;
       while (1){
 	if (v==next){  // There is a match
-	  do_output_all_results(A,sorted,i,next-j,curptr,output,startpos);
+	  do_output_all_results(A,result,sorted,i,next-j,curptr,output,startpos);
 	  break;
 	}
 
@@ -660,15 +672,17 @@ void distribute_seq(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
 
 
 
-void do_output_all_results(int **A,uint sorted[],int i,int value,struct tree_node *curptr,int output,ulong startpos[]){
-   if (output==1){
+void do_output_all_results(int **A, tVMII& result,uint sorted[],int i,int value,struct tree_node *curptr,int output,ulong startpos[]){
+//   if (output==1){
      for(int z=curptr->from;z<=curptr->to;z++){
-       if (A[i][sorted[z]]==0 && value<=(startpos[sorted[z]+1]-startpos[sorted[z]]))   /* this will work because if the value is not 0
-				    , it will be the maximum suffix prefix match. */
-			A[i][sorted[z]]= value;
+//       if (A[i][sorted[z]]==0 && value<=(startpos[sorted[z]+1]-startpos[sorted[z]]))   /* this will work because if the value is not 0, it will be the maximum suffix prefix match. */
+//			A[i][sorted[z]]= value;
+       if (result[i][sorted[z]]==0 && value<=(startpos[sorted[z]+1]-startpos[sorted[z]]))   /* this will work because if the value is not 0, it will be the maximum suffix prefix match. */
+			result[i][sorted[z]]= value;
      }
-   }
-   else if (output==2){
+//   }
+// else
+   if (output==2){
      for(int z=curptr->from;z<=curptr->to;z++){
 		if (value>0 && i!=sorted[z] && value<=(startpos[sorted[z]+1]-startpos[sorted[z]]))   
 			printf("%d %d ---> %d\n", i,sorted[z], value);

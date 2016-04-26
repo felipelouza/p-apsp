@@ -4,6 +4,8 @@
 #include <omp.h>
 #include "Tools.h"
 #include "testutils.hpp"
+#include <map>
+#include <vector>
 #define SEPERATOR '\n'
 
 
@@ -19,6 +21,12 @@ struct stack_node{
 	struct stack_node *next;
 };
 
+using namespace std; 
+
+/**/
+typedef map<uint, uint> tMII;
+typedef vector<tMII> tVMII;
+/**/
 
 struct tree_node *create_tree(uchar *text,uint k,ulong n,ulong startp[],uint sorted[]);
 struct tree_node *create_tree_modified(uchar *text,uint k,ulong n,ulong startp[],struct stack_node **stacks);
@@ -40,17 +48,17 @@ void find_all_pairs(struct tree_node *ptr,uchar *T,ulong N,ulong K,ulong startpo
 //void find_all_pairs_no_output(struct tree_node *ptr,uchar *T,ulong N,ulong K,ulong startpos[],uint sorted[]);
 void find_all_pairs_modified(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulong startpos[],uint sorted[],int output);
 //void find_all_pairs_no_output_modified(struct tree_node *ptr,uchar *T,ulong N,ulong k,ulong startpos[],uint sorted[]);
-void traversal_modified(struct tree_node *ptr,int i,int **A,struct tree_node *root,uchar *T,int curpos,int curpos2,ulong startpos[],uint sorted[],ulong N,ulong k);
-void traversal_helper_modified(struct tree_node* ptr2,int i2,struct tree_node *ptr1,int i1,uchar * T,int curpos,int curpos2,uint k,int N,ulong startpos[],uint sorted[],int **A);
-void traversal1(struct tree_node *ptr,int **A,struct tree_node *root,uchar *T,int curpos,int curpos2,ulong startpos[],uint sorted[],ulong N,ulong k,int output);
-//void traversal1_no_output(struct tree_node *ptr,int **A,struct tree_node *root,uchar *T,int curpos,int curpos2,ulong startpos[],uint sorted[],ulong N,ulong k);
-void traversal2(struct tree_node* ptr2,int i2,struct tree_node *ptr1,int i1,uchar * T,int curpos,int curpos2,uint k,int N,ulong startpos[],uint sorted[],int **A,int output);
-//void traversal2_no_output(struct tree_node* ptr2,int i2,struct tree_node *ptr1,int i1,uchar * T,int curpos,int curpos2,uint k,int N,ulong startpos[],uint sorted[],int **A);
-void distribute_k_2(int threads,int start_p[],int end_p[],uchar *T,ulong startpos[],uint sorted[],int **A,struct  tree_node* ptr,ulong k,ulong N,int output,int min);
-void distribute_k_1(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,struct  tree_node* ptr,ulong k,ulong N,int output,int min);
-void distribute_k_3(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,struct  tree_node* ptr,ulong k,ulong N,int output,int min);
-void distribute_seq(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,struct  tree_node* ptr,ulong k,ulong N,int output,int min);
+void traversal_modified(struct tree_node *ptr,int i,int **A, tVMII& result,struct tree_node *root,uchar *T,int curpos,int curpos2,ulong startpos[],uint sorted[],ulong N,ulong k);
+void traversal_helper_modified(struct tree_node* ptr2,int i2,struct tree_node *ptr1,int i1,uchar * T,int curpos,int curpos2,uint k,int N,ulong startpos[],uint sorted[],int **A, tVMII& result);
+void traversal1(struct tree_node *ptr,int **A, tVMII& result,struct tree_node *root,uchar *T,int curpos,int curpos2,ulong startpos[],uint sorted[],ulong N,ulong k,int output);
+//void traversal1_no_output(struct tree_node *ptr,int **A, tVMII& result,struct tree_node *root,uchar *T,int curpos,int curpos2,ulong startpos[],uint sorted[],ulong N,ulong k);
+void traversal2(struct tree_node* ptr2,int i2,struct tree_node *ptr1,int i1,uchar * T,int curpos,int curpos2,uint k,int N,ulong startpos[],uint sorted[],int **A, tVMII& result,int output);
+//void traversal2_no_output(struct tree_node* ptr2,int i2,struct tree_node *ptr1,int i1,uchar * T,int curpos,int curpos2,uint k,int N,ulong startpos[],uint sorted[],int **A, tVMII& result);
+void distribute_k_2(int threads,int start_p[],int end_p[],uchar *T,ulong startpos[],uint sorted[],int **A, tVMII& result,struct  tree_node* ptr,ulong k,ulong N,int output,int min);
+void distribute_k_1(int threads,uchar *T,ulong startpos[],uint sorted[],int **A, tVMII& result,struct  tree_node* ptr,ulong k,ulong N,int output,int min);
+void distribute_k_3(int threads,uchar *T,ulong startpos[],uint sorted[],int **A, tVMII& result,struct  tree_node* ptr,ulong k,ulong N,int output,int min);
+void distribute_seq(int threads,uchar *T,ulong startpos[],uint sorted[],int **A, tVMII& result,struct  tree_node* ptr,ulong k,ulong N,int output,int min);
 
-void do_output_all_results(int **A,uint sorted[],int i, int value, struct tree_node *curptr,int output,ulong startpos[]);
+void do_output_all_results(int **A, tVMII& result,uint sorted[],int i, int value, struct tree_node *curptr,int output,ulong startpos[]);
 char decode(uchar *final,ulong pos);
 #endif

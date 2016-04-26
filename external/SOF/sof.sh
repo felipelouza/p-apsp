@@ -20,17 +20,21 @@ mkdir -p tests
 make clean 
 make
 
-#######################################################################
-
-for t in {0..5}
-do
-
-	echo converter ${src}${D[$d]}${ext[$d]} ${dir}${D[$d]}.${A[$a]}${ext[$d]} ${A[$a]}
-	./converter ${src}${D[$d]}${ext[$d]} ${dir}${D[$d]}.${A[$a]}${ext[$d]} ${A[$a]}
-
-done
-	
-
+########################################################################
+#
+#mkdir -p ${dir}
+#
+#for d in 0 
+#do
+#       for a in {0..6}
+#       do
+#       
+#               echo converter ${src}${D[$d]}${ext[$d]} ${dir}${D[$d]}.${A[$a]}${ext[$d]} ${A[$a]}
+#               ./converter ${src}${D[$d]}${ext[$d]} ${dir}${D[$d]}.${A[$a]}${ext[$d]} ${A[$a]}
+#       
+#       done
+#done   
+#
 #######################################################################
 
 	
