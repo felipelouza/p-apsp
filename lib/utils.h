@@ -17,7 +17,7 @@
 #endif
 
 
-#define m64 1
+#define m64 0
 
 #if m64
 	typedef int64_t  int_t;
