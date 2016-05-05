@@ -8,7 +8,7 @@ MY_CXX_OPT_FLAGS= -O3 -ffast-math -funroll-loops -m64 -fomit-frame-pointer -D_FI
 #MY_CXX_OPT_FLAGS= $(VLIB)
 MY_CXX=g++
 
-LFLAGS = -lm -ldl
+LFLAGS = -lm -ldl -fPIC
 
 LIBOBJ = external/malloc_count/malloc_count.o\
 	 lib/utils.o\
