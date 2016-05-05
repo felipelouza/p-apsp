@@ -3,7 +3,7 @@ VLIB= -g -O0
 
 LIB_DIR = ${HOME}/lib
 INC_DIR = ${HOME}/include
-MY_CXX_FLAGS= -std=c++11 -Wall -Wextra  -DNDEBUG $(CODE_COVER)
+MY_CXX_FLAGS= -std=c++11 -Wall -Wextra  -DNDEBUG -D__STDC_FORMAT_MACROS
 MY_CXX_OPT_FLAGS= -O3 -ffast-math -funroll-loops -m64 -fomit-frame-pointer -D_FILE_OFFSET_BITS=64
 #MY_CXX_OPT_FLAGS= $(VLIB)
 MY_CXX=g++
