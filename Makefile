@@ -73,8 +73,8 @@ valgrind:
 	valgrind --tool=memcheck --leak-check=full --track-origins=yes ./p-apsp $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
 
 diff:
-	ls -lh $(DIR)output.tmp.$(K).*.bin
-	diff $(DIR)output.tmp.$(K).seq.bin $(DIR)output.tmp.$(K).par.bin 
+#	ls -lh $(DIR)sdsl/output.$(INPUT).$(K).*.bin
+	diff $(DIR)sdsl/output.$(INPUT).$(K).seq.bin $(DIR)sdsl/output.$(INPUT).$(K).par.bin 
 
 remove:
 	rm $(DIR)sdsl/*.sdsl

@@ -23,7 +23,7 @@ make run_tustumi DIR=dataset/ INPUT=c_elegans_ests_200.fasta K=100 L=10 OUTPUT=0
 
 Both algorithms output _.bin_ files at input folder (if OUTPUT=1).
 
-In order to compare both output, one can change line 24 of main.cpp:
+In order to compare both output, change line 25 of [main.cpp](https://github.com/felipelouza/p-apsp/blob/master/main.cpp#L25):
 
 ```sh
 #define RESULT 1
@@ -38,8 +38,8 @@ And type:
 ```
 make
 make run DIR=dataset/ INPUT=c_elegans_ests_200.fasta K=100 L=10 OUTPUT=1 T=4
-make run_apsp DIR=dataset/ INPUT=c_elegans_ests_200.fasta K=100 L=10 OUTPUT=1
-make diff DIR=dataset/  K=100
+make run_tustumi DIR=dataset/ INPUT=c_elegans_ests_200.fasta K=100 L=10 OUTPUT=1
+make diff DIR=dataset/ INPUT=c_elegans_ests_200.fasta K=100
 ```
 
 
