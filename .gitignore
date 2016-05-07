@@ -10,3 +10,4 @@ utils_64.h
 *.swo
 *.sdsl
 *.bin
+*.sh
