@@ -20,8 +20,6 @@ CLAGS= -DSYMBOLBYTES=1
 
 ####
 
-#DIR = ~/dataset/ests/
-
 DIR = ~/dataset/
 INPUT = all_ests.fasta
 
@@ -31,8 +29,7 @@ OUTPUT = 0
 T = 4 # n_threads
 ####
 
-all: p-apsp apsp
-#suffix_array_solution_prac
+all: p-apsp apsp_tustumi suffix_array_solution_prac
 
 suffix_array_solution_prac: external/suffix_array_solution_prac.cpp ${LIBOBJ}
 	$(MY_CXX) $(CXX_FLAGS) external/suffix_array_solution_prac.cpp $(CCLIB) -o external/suffix_array_solution_prac  
@@ -43,8 +40,8 @@ lib: lib/file.o
 p-apsp: lib main.cpp ${LIBOBJ}
 	$(MY_CXX) $(CXX_FLAGS) main.cpp $(CCLIB) -o p-apsp ${LIBOBJ} 
 
-apsp: lib apsp.cpp
-	$(MY_CXX) $(CXX_FLAGS) apsp.cpp $(CCLIB) -o apsp  ${LIBOBJ} 
+apsp_tustumi: lib external/apsp_tustumi.cpp
+	$(MY_CXX) $(CXX_FLAGS) external/apsp_tustumi.cpp $(CCLIB) -o external/apsp_tustumi  ${LIBOBJ} 
 
 strip: utils/strip.cpp
 	$(MY_CXX) utils/strip.cpp -o utils/strip
@@ -53,7 +50,7 @@ clean:
 	rm external/suffix_array_solution_prac -f
 	rm external/malloc_count/malloc_count.o -f
 	rm p-apsp -f
-	rm apsp -f
+	rm external/apsp_tustumi -f
 	rm *.bin -f
 	rm lib/*.o -f
 	rm *.sdsl -f
@@ -66,8 +63,8 @@ run_suff:
 run_main: 
 	./p-apsp $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
 	
-run_apsp: 
-	./apsp $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
+run_tustumi: 
+	external/apsp_tustumi $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
 
 run_strip: 
 	utils/strip $(INPUT) $(K)

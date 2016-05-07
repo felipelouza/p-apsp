@@ -12,8 +12,8 @@
 #include <iostream>
 #include <cassert>
 #include <climits>
-#include "external/malloc_count/malloc_count.h"
-#include "lib/file.h"
+#include "malloc_count/malloc_count.h"
+#include "../lib/file.h"
 
 #include <omp.h>
 

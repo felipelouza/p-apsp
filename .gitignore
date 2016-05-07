@@ -1,7 +1,7 @@
 # ignore objects and archives, anywhere in the tree.
 *.[oa]
 p-apsp
-apsp
+apsp_tustumi
 suffix_array_solution_prac
 strip
 utils_32.h
