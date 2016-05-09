@@ -3,6 +3,9 @@
 p-apsp
 apsp_tustumi
 suffix_array_solution_prac
+Apsp
+gen
+converter
 strip
 utils_32.h
 utils_64.h
