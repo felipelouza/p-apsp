@@ -229,7 +229,7 @@ int main(int argc, char *argv[]){
 	//GLOBAL solution (reusing)	
 	
 	#if OMP
-		#pragma omp parallel for reduction(+:removes) reduction(+:overlaps) 
+		#pragma omp parallel for schedule(dynamic) reduction(+:removes) reduction(+:overlaps) 
 	#endif
 	for(uint_t t = 0; t < k; t++){
 

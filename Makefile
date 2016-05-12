@@ -4,11 +4,11 @@ VLIB= -g -O0
 LIB_DIR = ${HOME}/lib
 INC_DIR = ${HOME}/include
 MY_CXX_FLAGS= -std=c++11 -Wall -Wextra  -DNDEBUG -D__STDC_FORMAT_MACROS
-MY_CXX_OPT_FLAGS= -O3 -ffast-math -funroll-loops -m64 -fomit-frame-pointer -D_FILE_OFFSET_BITS=64
+MY_CXX_OPT_FLAGS= -O3 -m64 
 #MY_CXX_OPT_FLAGS= $(VLIB)
 MY_CXX=g++
 
-LFLAGS = -lm -ldl -fPIC
+LFLAGS = -lm -ldl
 
 LIBOBJ = external/malloc_count/malloc_count.o\
 	 lib/utils.o\
@@ -29,7 +29,8 @@ OUTPUT = 0
 T = 4 # n_threads
 ####
 
-all: p-apsp apsp_tustumi suffix_array_solution_prac
+all: p-apsp apsp_tustumi 
+#suffix_array_solution_prac
 
 suffix_array_solution_prac: external/suffix_array_solution_prac.cpp ${LIBOBJ}
 	$(MY_CXX) $(CXX_FLAGS) external/suffix_array_solution_prac.cpp $(CCLIB) -o external/suffix_array_solution_prac  
