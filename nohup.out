@@ -1,0 +1,1386 @@
+rm external/suffix_array_solution_prac -f
+rm external/suffix_array_solution_prac -f
+rm external/malloc_count/malloc_count.o -f
+rm external/malloc_count/malloc_count.o -f
+rm p-apsp -f
+rm p-apsp -f
+rm external/apsp_tustumi -f
+rm external/suffix_array_solution_prac -f
+rm *.bin -f
+rm external/apsp_tustumi -f
+rm *.bin -f
+rm external/malloc_count/malloc_count.o -f
+rm lib/*.o -f
+rm p-apsp -f
+rm external/apsp_tustumi -f
+rm lib/*.o -f
+rm *.sdsl -f
+rm *.bin -f
+rm *.sdsl -f
+rm lib/*.o -f
+rm *.sdsl -f
+cc    -c -o lib/file.o lib/file.c
+cc    -c -o lib/file.o lib/file.c
+cc    -c -o lib/file.o lib/file.c
+g++ -c lib/file.c -o lib/file.o 
+g++ -c lib/file.c -o lib/file.o 
+g++ -c lib/file.c -o lib/file.o 
+cc    -c -o external/malloc_count/malloc_count.o external/malloc_count/malloc_count.c
+cc    -c -o lib/utils.o lib/utils.c
+cc    -c -o lib/utils.o lib/utils.c
+cc    -c -o lib/utils.o lib/utils.c
+g++ -std=c++11 -Wall -Wextra  -DNDEBUG -D__STDC_FORMAT_MACROS -O3 -m64  -I/home/louza/include -L/home/louza/lib -lm -ldl main.cpp -lsdsl -ldivsufsort -ldivsufsort64 -Wno-comment -fopenmp -o p-apsp external/malloc_count/malloc_count.o lib/utils.o lib/file.o 
+g++ -std=c++11 -Wall -Wextra  -DNDEBUG -D__STDC_FORMAT_MACROS -O3 -m64  -I/home/louza/include -L/home/louza/lib -lm -ldl main.cpp -lsdsl -ldivsufsort -ldivsufsort64 -Wno-comment -fopenmp -o p-apsp external/malloc_count/malloc_count.o lib/utils.o lib/file.o 
+g++ -std=c++11 -Wall -Wextra  -DNDEBUG -D__STDC_FORMAT_MACROS -O3 -m64  -I/home/louza/include -L/home/louza/lib -lm -ldl main.cpp -lsdsl -ldivsufsort -ldivsufsort64 -Wno-comment -fopenmp -o p-apsp external/malloc_count/malloc_count.o lib/utils.o lib/file.o 
+g++ -std=c++11 -Wall -Wextra  -DNDEBUG -D__STDC_FORMAT_MACROS -O3 -m64  -I/home/louza/include -L/home/louza/lib -lm -ldl external/apsp_tustumi.cpp -lsdsl -ldivsufsort -ldivsufsort64 -Wno-comment -fopenmp -o external/apsp_tustumi  external/malloc_count/malloc_count.o lib/utils.o lib/file.o 
+g++ -std=c++11 -Wall -Wextra  -DNDEBUG -D__STDC_FORMAT_MACROS -O3 -m64  -I/home/louza/include -L/home/louza/lib -lm -ldl external/apsp_tustumi.cpp -lsdsl -ldivsufsort -ldivsufsort64 -Wno-comment -fopenmp -o external/apsp_tustumi  external/malloc_count/malloc_count.o lib/utils.o lib/file.o 
+g++ -std=c++11 -Wall -Wextra  -DNDEBUG -D__STDC_FORMAT_MACROS -O3 -m64  -I/home/louza/include -L/home/louza/lib -lm -ldl external/apsp_tustumi.cpp -lsdsl -ldivsufsort -ldivsufsort64 -Wno-comment -fopenmp -o external/apsp_tustumi  external/malloc_count/malloc_count.o lib/utils.o lib/file.o 
+g++ -std=c++11 -Wall -Wextra  -DNDEBUG -D__STDC_FORMAT_MACROS -O3 -m64  -I/home/louza/include -L/home/louza/lib -lm -ldl external/suffix_array_solution_prac.cpp -lsdsl -ldivsufsort -ldivsufsort64 -Wno-comment -fopenmp -o external/suffix_array_solution_prac  
+g++ -std=c++11 -Wall -Wextra  -DNDEBUG -D__STDC_FORMAT_MACROS -O3 -m64  -I/home/louza/include -L/home/louza/lib -lm -ldl external/suffix_array_solution_prac.cpp -lsdsl -ldivsufsort -ldivsufsort64 -Wno-comment -fopenmp -o external/suffix_array_solution_prac  
+g++ -std=c++11 -Wall -Wextra  -DNDEBUG -D__STDC_FORMAT_MACROS -O3 -m64  -I/home/louza/include -L/home/louza/lib -lm -ldl external/suffix_array_solution_prac.cpp -lsdsl -ldivsufsort -ldivsufsort64 -Wno-comment -fopenmp -o external/suffix_array_solution_prac  
+################
+all_ests
+####
+L=5
+########
+K=10000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=50000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=100000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=150000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=200000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=250000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=300000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+####
+L=10
+########
+K=10000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=50000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=100000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=150000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=200000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=250000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=300000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+####
+L=15
+########
+K=10000
+################
+all_ests
+####
+L=5
+########
+K=10000
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=50000
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=100000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=150000
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=50000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=200000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=100000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=250000
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=300000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+####
+L=20
+########
+K=10000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=50000
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=150000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=100000
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=150000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=200000
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=250000
+########
+K=200000
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=300000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=250000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=300000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+####
+L=10
+########
+K=10000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=50000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=100000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=150000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=200000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=250000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=300000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+####
+L=15
+########
+K=10000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=50000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=100000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=150000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=200000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=250000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=300000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+####
+L=20
+########
+K=10000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=50000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=100000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=150000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+################
+all_ests
+####
+L=5
+########
+K=10000
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=200000
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=250000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=50000
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+########
+K=300000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=100000
+sof.sh: line 68: ./Apsp: No such file or directory
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+sof.sh: line 68: ./Apsp: No such file or directory
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=150000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=200000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=250000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=300000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+####
+L=10
+########
+K=10000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=50000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=100000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=150000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=200000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=250000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=300000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+####
+L=15
+########
+K=10000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=50000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=100000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=150000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=200000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=250000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=300000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+####
+L=20
+########
+K=10000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 10000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=50000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 50000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=100000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 100000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=150000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 150000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=200000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 200000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=250000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 250000 strings in all_ests.fasta
+4,685
+4,096
+########
+K=300000
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096
+chdir: No such file or directory
+file_open: No such file or directory
+Error: less than 300000 strings in all_ests.fasta
+4,685
+4,096

@@ -47,9 +47,9 @@ Note: all algorithms need [sdsl-lite](https://github.com/simongog/sdsl-lite).
 
 #references:
 
-[1] Louza, F. A, Gog, S., Zanotto, L., Araujo, G., Telles, G. P. (2016). Parallel computation for the all-pairs suffix-prefix problem. (Submitted).
+[1] Louza, F. A, Gog, S., Zanotto, L., Araujo, G., Telles, G. P. (2016). Parallel computation for the all-pairs suffix-prefix problem. In Proc SPIRE, pp 122-132, 2016, http://link.springer.com/chapter/10.1007/978-3-319-46049-9\_12.
 
-[2] Tustumi, W. H. A., Gog, S., Telles, G. P., Louza, F.A. (2016). An improved algorithm for the all-pairs suffix-prefix problem. Journal of Discrete Algorithms, 1-10 (In Press), [![http://dx.doi.org/10.1016/j.jda.2016.04.002](https://img.shields.io/badge/doi-10.1145%2F2807591.2807609-blue.svg)](http://dx.doi.org/10.1016/j.jda.2016.04.002).
+[2] Tustumi, W. H. A., Gog, S., Telles, G. P., Louza, F.A. (2016). An improved algorithm for the all-pairs suffix-prefix problem. Journal of Discrete Algorithms, 47, 34-43, http://www.sciencedirect.com/science/article/pii/S1570866716300053.
 
 
 
