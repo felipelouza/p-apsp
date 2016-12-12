@@ -1,5 +1,7 @@
 #include "file.h"
 
+/* Returns the file extension
+ */
 const char *get_filename_ext(const char *filename) {                                                  
     const char *dot = strrchr(filename, '.');                                                         
     if(!dot || dot == filename) return "";                                                            
@@ -9,7 +11,7 @@ const char *get_filename_ext(const char *filename) {
 /*******************************************************************/
 
 /* Changes to a working directory, where everything will be read
- * from and written to:
+ * from and written to
  */ 
 int file_chdir(char* dir){
 	
@@ -30,6 +32,8 @@ FILE* file_open(char *c_file, const char * c_mode){
 	
 	f_in = fopen(c_file, c_mode);
 	if (!f_in) perror ("file_open");
+
+	fseek(f_in, 0, SEEK_SET);
 	
 return f_in;
 }
@@ -52,6 +56,29 @@ size_t file_size(FILE* f_in){
     rewind(f_in);
 	
 return length;
+}
+
+/*******************************************************************/
+
+uint_t file_read(FILE* f_in){
+
+uint_t value;
+
+	fread(&value, sizeof(uint_t), 1, f_in);
+
+//	printf("read = %" PRIdN"\n", value);
+
+return value;
+}
+
+/*******************************************************************/
+
+int file_write(FILE* f_out, uint_t value){
+
+//	printf("write(%" PRIdN")\n", value);
+	fwrite(&value, sizeof(uint_t), 1, f_out);
+
+return 0;
 }
 
 /*******************************************************************/
@@ -92,6 +119,7 @@ char** load_multiple_txt(FILE* f_in, uint_t k, uint_t *n) {
 			
 		ssize_t size = getline(&c_buffer[i], &len, f_in);
 		if (size == -1){
+			printf("K = %d\n", i);
 			return 0;
 		}
 		c_buffer[i][size-1] = 0;
@@ -204,6 +232,10 @@ char** file_load_multiple(char* c_file, uint_t k, uint_t *n) {
 
 	else if(strcmp(type,"fastq") == 0)
 		c_buffer = load_multiple_fastq(f_in, k, n);
+	else{
+		printf("Error: file not recognized (.txt, .fasta, .fastq)\n");
+		return 0;
+	}
 
 	fclose(f_in);
 
@@ -223,6 +255,87 @@ void mkdir(const char* c_file){
 			
 	system (c_aux);//remove .bin
 	
+}
+/*******************************************************************/
+
+int file_text_write(unsigned char *str, int_t n, char* c_file, const char* ext){
+
+	FILE *f_out;
+	char *c_out = (char*) malloc((strlen(c_file)+strlen(ext)+3)*sizeof(char));
+	
+	sprintf(c_out, "%s.%s", c_file, ext);
+	f_out = file_open(c_out, "wb");
+	
+	fwrite(str, sizeof(unsigned char), n, f_out);
+	
+	file_close(f_out);
+	free(c_out);
+
+return 1;
+}
+
+int file_text_int_write(int_t *str, int_t n, char* c_file, const char* ext){
+
+	FILE *f_out;
+	char *c_out = (char*) malloc((strlen(c_file)+strlen(ext))*sizeof(char));
+	
+	sprintf(c_out, "%s.%s", c_file, ext);
+	f_out = file_open(c_out, "wb");
+	
+	fwrite(str, sizeof(int_t), n, f_out);
+	
+	file_close(f_out);
+	free(c_out);
+
+return 1;
+}
+
+/*******************************************************************/
+
+int_t file_text_read(unsigned char** str, char* c_file, const char* ext){
+
+        FILE *f_in;
+        char *c_in = (char*) malloc((strlen(c_file)+strlen(ext))*sizeof(char));
+
+        sprintf(c_in, "%s.%s", c_file, ext);
+        f_in = file_open(c_in, "rb");
+
+	fseek(f_in, 0L, SEEK_END);
+	size_t size = ftell(f_in);
+	rewind(f_in);
+
+	int_t n = size/sizeof(unsigned char);
+
+        *str = (unsigned char*) malloc(n*sizeof(unsigned char));
+        fread(*str, sizeof(unsigned char), n, f_in);
+
+        file_close(f_in);
+        free(c_in);
+
+return n;
+}
+
+int_t file_text_int_read(int_t** str_int, char* c_file, const char* ext){
+
+        FILE *f_in;
+        char *c_in = (char*) malloc((strlen(c_file)+strlen(ext))*sizeof(char));
+
+        sprintf(c_in, "%s.%s", c_file, ext);
+        f_in = file_open(c_in, "rb");
+
+	fseek(f_in, 0L, SEEK_END);
+	size_t size = ftell(f_in);
+	rewind(f_in);
+
+	int_t n = size/sizeof(int_t);
+
+        *str_int = (int_t*) malloc(n*sizeof(int_t));
+        fread(*str_int, sizeof(int_t), n, f_in);
+
+        file_close(f_in);
+        free(c_in);
+
+return n;
 }
 
 /*******************************************************************/

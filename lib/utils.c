@@ -2,6 +2,11 @@
 
 /**********************************************************************/
 
+void time_start(time_t *t_time, clock_t *c_clock){
+
+	*t_time = time(NULL);
+	*c_clock =  clock();
+}
 
 double time_stop(time_t t_time, clock_t c_clock){
 
@@ -10,7 +15,7 @@ double time_stop(time_t t_time, clock_t c_clock){
 	
 	printf("CLOCK = %lf TIME = %lf\n", aux1, aux2);
 	
-	return aux2;
+	return aux1;
 }
 
 
@@ -73,4 +78,110 @@ int_t min_range(int_t* A, int_t l, int_t r){
 
 return min;
 }
+/*******************************************************************/
+int_t* cat_int(unsigned char** R, int k, int_t *n){
+
+	(*n)++; //add 0 at the end
+
+	int_t i, j;
+	int_t l=0;
+	int_t *str_int = (int_t*) malloc((*n)*sizeof(int_t));
+
+	for(i=0; i<k; i++){
+		int_t m = strlen((char*)R[i]);
+		for(j=0; j<m; j++){
+			//removes symbols > 255
+			if(R[i][j]+1<256) str_int[l++] = R[i][j]+(k+1);
+			else (*n)--;
+		}
+//		for(j=0; j<m; j++)
+//			str_int[l++] = R[i][j]+(k+1);
+		str_int[l++] = i+1; //add $_i as separator
+	}
+	
+	str_int[l++]=0;
+        if(*n>l){
+		str_int = (int_t*) realloc(str_int, (l)*sizeof(int_t));
+		printf("N = %" PRIdN "\n", l);
+	}
+	*n = l;
+
+return str_int;
+}
+/*******************************************************************/
+unsigned char* cat_char(unsigned char** R, int k, int_t *n){
+
+	(*n)++; //add 0 at the end
+
+	int_t i, j;
+	int_t l=0;
+	unsigned char *str = (unsigned char*) malloc((*n)*sizeof(unsigned char));
+
+	for(i=0; i<k; i++){
+		int_t m = strlen((char*)R[i]);
+		//removes empty strings
+		if(m==0){
+			(*n)--;
+			continue;
+		}
+		for(j=0; j<m; j++){
+			//removes symbols > 255
+			if(R[i][j]+1<256 && R[i][j]+1>0) str[l++] = R[i][j]+1;
+			else (*n)--;
+		}
+		str[l++] = 1; //add 1 as separator
+	}
+
+	str[l++]=0;
+        if(*n>l){
+		str = (unsigned char*) realloc(str, (l)*sizeof(unsigned char));
+		printf("N = %" PRIdN "\n", l);
+	}
+	*n = l;
+
+return str;
+}
+
 /**********************************************************************/
+double log2(double i){
+	return log(i)/log(2);
+}
+/**********************************************************************/
+
+static void swap2(void *x, void *y, size_t l) {
+   char *a = x, *b = y, c;
+   while(l--) {
+      c = *a;
+      *a++ = *b;
+      *b++ = c;
+   }
+}
+
+static void sort(char *array, size_t size, int (*cmp)(void*,void*), int begin, int end) {
+   if (end > begin) {
+      void *pivot = array + begin;
+      int l = begin + size;
+      int r = end;
+      while(l < r) {
+         if (cmp(array+l,pivot) <= 0) {
+            l += size;
+         } else if ( cmp(array+r, pivot) > 0 )  {
+            r -= size;
+         } else if ( l < r ) {
+            swap2(array+l, array+r, size);
+         }
+      }
+      l -= size;
+      swap2(array+begin, array+l, size);
+      sort(array, size, cmp, begin, l);
+      sort(array, size, cmp, r, end);
+   }
+}
+
+void qsort2(void *array, size_t nitems, size_t size, int (*cmp)(void*,void*)) {
+   sort(array, size, cmp, 0, nitems*size);
+}
+
+/**********************************************************************/
+
+

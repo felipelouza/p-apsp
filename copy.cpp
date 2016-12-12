@@ -11,8 +11,8 @@
 #include <sdsl/construct_config.hpp>
 #include <iostream>
 #include <climits>
-#include "lib/utils.h"
 #include "lib/file.h"
+#include "lib/utils.h"
 #include "external/malloc_count/malloc_count.h"
 
 #include <omp.h>
@@ -27,10 +27,14 @@
 using namespace std;
 using namespace sdsl;
 
-
 typedef struct _list{    
+    uint_t lcp;
+    uint_t next;
+} tLIST;
+
+typedef struct _tl{    
     uint_t value;
-    struct _list *prox;
+    struct _tl *next;
 } Tl;
 
 typedef map<uint_t, uint_t> tMII;
@@ -38,15 +42,18 @@ typedef vector<tMII> tVMII;
 
 /**/ //SAVE_SPACE
 typedef map<uint_t, Tl*> tML;
-typedef vector<tML> tVL;
+typedef vector<Tl*> tVL;
+
+typedef vector<tML> tVML;
 
 typedef map<uint_t, Tl**> tMLL;
-typedef vector<tMLL> tVLL;
+typedef vector<Tl**> tVLL;
 /**/
 
-inline void insert(tML& Llocal, tMLL& Next, int_t p, int_t value);
-inline void remove(Tl **list);
-inline void prepend(Tl **Lg, tMLL& Next, tML& Llocal, int_t p);
+inline void INSERT(tLIST* LIST, int_t ptr, int t, int lcp, uint_t *TOP_l,  uint_t *TOP_g, uint_t* LAST);
+inline void insert(Tl ***next, int t, int value, Tl *sentinel);
+inline void remove(Tl **list, int t);
+inline void prepend(Tl **list1, Tl **list2, Tl***next, int t, Tl *sentinel);
 
 double start, total;
 
@@ -59,11 +66,14 @@ int main(int argc, char *argv[]){
 	if(argc!=7)
 		return 1;
 
-	char* c_dir = argv[1];
-	char* c_file = argv[2];
+	/**/
 
-    	sscanf(argv[3], "%" PRIdN "", &k);
+	char* c_dir = argv[1];//dir
+	char* c_file = argv[2];//file
 
+    	sscanf(argv[3], "%" PRIdN "", &k);//number of strings
+
+	//load the strings
 	file_chdir(c_dir);
 	unsigned char **R = (unsigned char**) file_load_multiple(c_file, k, &n);
 	if(!R){
@@ -90,6 +100,8 @@ int main(int argc, char *argv[]){
 		free(R[i]);
 	free(R);
 
+	/**/
+
 	uint_t threshold;
 	sscanf(argv[4], "%" PRIdN "", &threshold);
 	printf("L: %" PRIdN "\n", threshold);
@@ -100,6 +112,8 @@ int main(int argc, char *argv[]){
 	int_t n_threads;
 	sscanf(argv[6], "%" PRIdN "", &n_threads);
 	printf("K: %" PRIdN "\n", k);
+	
+n_threads = 1;
 
 	#if OMP
 		omp_set_num_threads(n_threads);
@@ -113,13 +127,11 @@ int main(int argc, char *argv[]){
 	#endif
 
 	cout<<"length of all strings N = "<<n<<endl; //" Number of strings k="<<k<<endl;
-
 	printf("sizeof(int): %zu bytes\n", sizeof(int_t));
 
 	#if SAVE_SPACE
 		cout<<"SAVE_SPACE"<<endl;
 	#endif
-
 
  	string dir = "sdsl";
 	mkdir(dir.c_str());
@@ -152,6 +164,8 @@ int main(int argc, char *argv[]){
 		#endif
 	}
 
+	/**/
+
     	uint_t *Block =  new uint_t[k];
     	uint_t *Prefix = new uint_t[k];
 
@@ -167,9 +181,27 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	tVL Llocal(k);
-	tVLL Next(k);
+	uint_t *TOP_l = (uint_t*) malloc(k*sizeof(uint_t));
+	uint_t *TOP_g = (uint_t*) malloc(k*sizeof(uint_t));
+	uint_t *LAST = (uint_t*) malloc(k*sizeof(uint_t));
 
+	for(uint_t p = 0; p < k; p++){
+		TOP_l[p] = TOP_g[p]=UINT_MAX;
+		LAST[p]=0;
+	}
+
+	Tl ***next = (Tl ***) malloc(k * sizeof(Tl**));
+	Tl **Ll = (Tl **)  malloc(k * sizeof(Tl*));
+	Tl **Lg = (Tl **)  malloc(k * sizeof(Tl*));
+
+	Tl *sentinel = (Tl *) malloc(sizeof(Tl));
+	sentinel->value = 0;
+
+	for(uint32_t p = 0; p < k; p++){
+		Lg[p] = sentinel;
+		Ll[p] = sentinel;
+		next[p] = Ll+p;
+    	}
 
 	#if SAVE_SPACE
 		tVMII result(k);//(k, tVI(k,0));
@@ -190,18 +222,36 @@ int main(int argc, char *argv[]){
 	#endif
 
 	uint_t inserts = 0, removes = 0;
+	uint_t ov=0;
+	uint_t contained=0;
 
-	uint_t *Min_lcp = new uint_t[k];
+	//FELIPE: we can scan first to find overlaps
+	uint_t overlaps = n;
+
+	tLIST *LIST = (tLIST*) malloc(overlaps*sizeof(tLIST));
+	uint_t pos=overlaps-1;
+
+	LIST[pos].lcp = 0;
+	LIST[pos].next = UINT_MAX;
+
+
+	uint_t min_lcp;
 
 	#if OMP
 		#pragma omp parallel for reduction(+:inserts)
 	#endif
 	for(uint_t p = 0; p < k; p++){
 	
-		uint_t min_lcp = UINT_MAX;
+		uint_t ptr;
 
 		//LOCAL solution:
 		uint_t previous =(p>0? Block[p-1]: k+1);
+
+		//First, count the number of local overlaps
+		uint_t local_overlaps=0;
+		uint_t last_overlap=previous;
+	
+		min_lcp = UINT_MAX;
 		for(uint_t i=Block[p]-1; i>=previous; --i){
 
 			if(min_lcp >= lcp[i+1]){
@@ -210,88 +260,118 @@ int main(int argc, char *argv[]){
 				uint_t t = str_int[sa[i]+lcp[i+1]]-1;//current suffix     
 
 				if(t < k)//complete overlap
-					if(min_lcp >= threshold){
-						insert(Llocal[t], Next[t], p, lcp[i+1]); 
-						inserts++;
-					}
+				if(min_lcp >= threshold){
+					local_overlaps++;
+//					last_overlap=i;
+				}
         		}
 		}
-		Min_lcp[p] = min_lcp;
-	}
 
-	#if OMP
-		cout<<"--"<<endl;
-		printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
-		start = omp_get_wtime();
-	#endif
+//cout<<"## "<<min_lcp<<endl;
 
-	uint_t overlaps=0;
-	//GLOBAL solution (reusing)	
-	
-	#if OMP
-		#pragma omp parallel for reduction(+:removes) reduction(+:overlaps) 
-	#endif
-	for(uint_t t = 0; t < k; t++){
-
-//	printf("### [%d] = %d ###\n", omp_get_thread_num(), t);
-
-		uint_t min_lcp;
-		Tl *Lg = NULL;
-
-		for(uint_t p = 0; p < k && !Llocal[t].empty(); ++p){
-		
-			min_lcp = Min_lcp[p];
-				
-			while(Lg!=NULL){
-				if(Lg->value > min_lcp) remove(&Lg);
-				else break;
+/*
+		//removes non-valid overlaps
+		//for(uint_t t = 0; t < k; t++){
+			while(LIST[pos].lcp > min_lcp){
+				pos++;
 				removes++;
 			}
+		//}
+
+		//updates TOP_g and LAST
+		for(uint_t t = 0; t < k; t++){
 		
-			if(Llocal[t].find(p)!=Llocal[t].end()){
-	
-				if(Lg) prepend(&Lg, Next[t], Llocal[t], p);
-				else Lg = Llocal[t][p];
-			}
-	
-			if(Lg){
+		//	while(TOP_g[t]<pos) TOP_g[t] = LIST[TOP_g[t]].next;
+			LAST[t] = 0;
+			TOP_l[t] = UINT_MAX;
+		}
+*/
+
+		pos -= local_overlaps;
+		ptr = pos;
+
+//if(local_overlaps){
+//for(uint_t i=pos;i<overlaps;i++)
+//cout<<"<"<<LIST[i].lcp<<", "<<LIST[i].next<<">\t";
+//cout<<endl;
+//}
+
+//if(local_overlaps) cout<<local_overlaps<<"\t"<<pos<<endl;
+
+
+		//find the local overlaps
+		min_lcp = UINT_MAX;
+		for(uint_t i=Block[p]-1; i>=previous && i>=last_overlap; --i){
+
+			if(min_lcp >= lcp[i+1]){
+
+				min_lcp = lcp[i+1];
+				//access T[SA[i]+LCP[i+1]]
+				uint_t t = str_int[sa[i]+lcp[i+1]]-1;//current suffix     
+
+				if(t < k)//complete overlap
+				if(min_lcp >= threshold){
+
+					INSERT(LIST, ptr++, t, lcp[i+1], TOP_l, TOP_g, LAST);
+
+					insert(next, t, lcp[i+1], sentinel);
+					inserts++;
+				}
+        		}
+		}
+
+
+//		Min_lcp[p] = min_lcp;
+/*
+		//GLOBAL solution (reusing)	
+		for(uint_t t = 0; t < k; t++){
+
+			if(TOP_l[t]!=UINT_MAX) TOP_g[t] = TOP_l[t];
+
+			//uint_t min_lcp =  Min_lcp[p];
+					
+			if(TOP_g[t]<UINT_MAX){
 			#if SAVE_SPACE
 				if(t!=Prefix[p])
 			#endif
 			#if RESULT
-				result[t][Prefix[p]] = Lg->value;
+				result[t][Prefix[p]] = LIST[TOP_g[t]].lcp;
 			#else
-				result[Prefix[p]][t] = Lg->value;
+				result[Prefix[p]][t] = LIST[TOP_g[t]].lcp;
 			#endif
-				overlaps++;
+				ov++;
 			}
-	
+			
+			//removes non-valid overlaps
+//			while(LIST[pos].lcp > min_lcp)
+//				pos++;
+			while(Lg[t]->value > min_lcp){
+				remove(Lg, t);
+				removes++;
+			}
+			
+			prepend(Lg, Ll, next, t, sentinel);
+			if(Lg[t]->value){
+			#if SAVE_SPACE
+				if(t!=Prefix[p])
+			#endif
+			#if RESULT
+				result[t][Prefix[p]] = Lg[t]->value;
+			#else
+				result[Prefix[p]][t] = Lg[t]->value;
+			#endif
+				ov++;
+			}
 		}
+
+
+*/
+		//contained suffixes
 	
-		//free	
-		while(Lg!=NULL){
-			remove(&Lg);
-		}
-		
-	}
-
-	#if OMP
-	cout<<"--"<<endl;
-	printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
-	start = omp_get_wtime();
-	#endif	
-
-	uint_t contained=0;
-	//contained suffixes
-	#if OMP
-		#pragma omp parallel for reduction(+:contained) //firstprivate(threshold,n,k) 
-	#endif
-	for(uint_t p = 0; p < k; p++){
-
 		#if SAVE_SPACE == 0
 			result[p][p] = 0;
 		#endif
-
+	
 		uint_t q = Block[p]+1;
 		//while(lcp[q] == ms[Prefix[p]] and ((tt=str_int[sa[q]+[Prefix[p]]]-1) < k ) and q < n ){
 		while(str_int[sa[q]+lcp[q]] < k and q < n ){
@@ -300,7 +380,7 @@ int main(int argc, char *argv[]){
 			
 				uint_t tt=str_int[sa[q]+lcp[q]]-1;
 				contained++;
-
+	
 				#if RESULT 
 					result[tt][Prefix[p]] = lcp[q];
 				#else
@@ -311,8 +391,8 @@ int main(int argc, char *argv[]){
 				break;
 			q++;
 		}
-
 	}
+	
 
 	#if OMP
 		cout<<"--"<<endl;
@@ -328,7 +408,7 @@ int main(int argc, char *argv[]){
 	cout<<"--"<<endl;
    	printf("inserts %" PRIdN "\n", inserts);
 	printf("removes %" PRIdN "\n", removes);
-        printf("overlaps %" PRIdN " (%" PRIdN ")\n", overlaps, contained);
+        printf("overlaps %" PRIdN " (%" PRIdN ")\n", ov, contained);
 	cout<<"--"<<endl;
 
 
@@ -350,7 +430,7 @@ int main(int argc, char *argv[]){
 		#endif
 
 		if(output==1){
-			ofstream out_file(dir+"/output."+id+".par.bin",ios::out | ios::binary);			
+			ofstream out_file(dir+"/output."+id+".new.bin",ios::out | ios::binary);			
 			for (tVMII::iterator it_row=result.begin(); it_row!=result.end(); ++it_row)
 				for(tMII::iterator it_column=it_row->begin(); it_column!=it_row->end(); ++it_column)
 					out_file.write((char*)&it_column->second, sizeof(uint_t));
@@ -367,7 +447,7 @@ int main(int argc, char *argv[]){
 		#endif
 
 		if(output==1){
-			ofstream out_file(dir+"/output."+id+".par.bin",ios::out | ios::binary);			
+			ofstream out_file(dir+"/output."+id+".new.bin",ios::out | ios::binary);			
 			for(uint_t i=0; i<k; ++i)
 				for(uint_t j=0; j<k; ++j)
 					out_file.write((char*)&result[i][j], sizeof(uint_t));
@@ -382,41 +462,63 @@ int main(int argc, char *argv[]){
 
 	delete[] Block;
 	delete[] Prefix;
-	delete[] Min_lcp;
+
+	//free Lists
+	for(uint32_t i = 0; i<k; ++i){
+	    Tl *aux = Lg[i];
+	    while(aux != sentinel){
+	        Lg[i] = Lg[i]->next;
+	        free(aux);
+	        aux = Lg[i];
+	    }
+	}
+
+	free(Lg);
+	free(Ll);
+	free(next);
+	free(sentinel);
+
+
+	free(TOP_l);free(TOP_g);free(LAST);free(LIST);
 
 	return 0;
 }
 
-inline void insert(tML& Llocal, tMLL& Next,int_t p, int_t value){
+inline void INSERT(tLIST* LIST, int_t ptr, int t, int lcp, uint_t *TOP_l,  uint_t *TOP_g, uint_t* LAST){
 
-	#pragma omp critical
-	{
-		Tl *aux;
-		aux = new Tl;
-		aux->value = value;
-		aux->prox = NULL;    
+	if(TOP_l[t]==UINT_MAX) TOP_l[t] = ptr;
 
-		if(Next.find(p)!=Next.end() ){
-			*(Next[p]) = aux;
-		}
-		else{ //first element
-			Llocal[p] = aux;
-		}
-		Next[p] = &(aux->prox);	
-	}
+	LIST[ptr].lcp = lcp;
+	LIST[ptr].next=TOP_g[t];
+
+	LIST[LAST[t]].next = ptr;
+
+	LAST[t] = ptr;
 }
 
-inline void remove(Tl **list){
+
+inline void insert(Tl ***next, int p, int value, Tl *sentinel){
     
-	Tl *aux = *list;
-	*list = (*list)->prox;
-	delete aux;
+    Tl *aux;
+    aux = (Tl *) malloc(sizeof(*aux));
+    aux->value = value;
+    aux->next = sentinel;    
+    *(next[p]) = aux;
+    next[p] = &(aux->next);
+}    
+    
+inline void remove(Tl **list, int p){
+    
+    Tl *aux;
+    aux = list[p];
+    list[p] = list[p]->next;
+    free(aux);
 }
 
-inline void prepend(Tl **Lg, tMLL& Next, tML& Llocal, int_t p){
+inline void prepend(Tl **list1, Tl **list2, Tl***next, int p, Tl *sentinel){
 
-	*(Next[p]) = *Lg;
-	*Lg = Llocal[p];
-	Llocal[p] = NULL;
+    *(next[p]) = list1[p];
+    list1[p] = list2[p];
+    list2[p] = sentinel;
+    next[p] = list2 + p;
 }
-
