@@ -14,6 +14,7 @@
 #include "lib/file.h"
 #include "lib/utils.h"
 #include "external/malloc_count/malloc_count.h"
+//#include <sdsl/bit_vectors.hpp>
 
 #include <omp.h>
 
@@ -22,7 +23,7 @@
 #define OMP 1
 
 //output format [row, column]
-#define RESULT 0 // 0 = [prefix, suffix], 1 = [suffix, prefix]
+#define RESULT 1 // 0 = [prefix, suffix], 1 = [suffix, prefix]
 
 using namespace std;
 using namespace sdsl;
@@ -151,47 +152,6 @@ int main(int argc, char *argv[]){
 
 	/********/
 
-    	uint_t *Block =  new uint_t[K];
-
-	//Find position of each Block b_i
-	size_t tmp=0; 
-	for(size_t i=0;i<sa.size();++i){
-
-		uint_t t = str_int[(sa[i]+n-1)%n];	
-		if( t < K ){// found whole string as suffix
-			Block[tmp++] = i;
-		}
-	}
-
-	int_t partition = (K/n_threads);
-	#if OMP
-		#pragma omp parallel for 
-	#endif
-	for(int_t proc=0; proc < n_threads; proc++){
-
-		uint_t start = proc*partition;
-		uint_t end = (proc+1)*partition-1;
-		if(proc==n_threads-1) end = K-1;
-
-		#pragma omp critical
-		cout<<"thread_"<<proc<<"\t"<<start<<"\t"<<end<<endl;
-
-	}
-
-
-	uint_t *TOP_l = (uint_t*) malloc(K*sizeof(uint_t));
-	uint_t *TOP_g = (uint_t*) malloc(K*sizeof(uint_t));
-	uint_t *LAST = (uint_t*) malloc(K*sizeof(uint_t));
-
-	uint_t *Overlaps = (uint_t*) malloc(K*sizeof(uint_t));
-	uint_t *Min_lcp = (uint_t*) malloc(K*sizeof(uint_t));
-
-	for(uint_t p = 0; p < K; p++){
-		TOP_l[p] = TOP_g[p] = UINT_MAX;
-		LAST[p]=Overlaps[p]=0;
-	}
-
-
 	#if SAVE_SPACE
 		tVMII result(K);//(K, tVI(K,0));
 	#else
@@ -210,132 +170,179 @@ int main(int argc, char *argv[]){
 		start = omp_get_wtime();
 	#endif
 
-	//FELIPE: preprocess to find the number of overlaps
-	uint_t overlaps = 0;
+    	uint_t *Block =  new uint_t[K];
 
-	for(uint_t p = 0; p < K; p++){
-		//LOCAL solution:
-		uint_t previous =(p>0? Block[p-1]: K+1);
-		uint_t min_lcp = UINT_MAX;
-		for(uint_t i=Block[p]-1; i>=previous; --i){
-			if(min_lcp >= lcp[i+1]){
-
-				min_lcp = lcp[i+1];
-				uint_t t = str_int[sa[i]+lcp[i+1]]-1;//current suffix     
-
-				if(t < K)//complete overlap
-				if(min_lcp >= threshold){
-					Overlaps[p]++;
-				}
-        		}
+	//Find position of each Block b_i
+	size_t tmp=0; 
+	for(size_t i=0;i<sa.size();++i){
+		uint_t t = str_int[(sa[i]+n-1)%n];	
+		if( t < K ){// found whole string as suffix
+			Block[tmp++] = i;
 		}
-		overlaps += Overlaps[p];
-		Min_lcp[p] = min_lcp;
 	}
-	
-	overlaps++;
-	tLIST *LIST = (tLIST*) malloc(overlaps*sizeof(tLIST));
-	uint_t pos=overlaps-1;
 
-	LIST[pos].lcp = 0;
-	LIST[pos].next = UINT_MAX;
+/**/
 	uint_t inserts = 0, removes = 0;
 	uint_t ov=0;
 	uint_t contained=0;
-
-	uint_t min_lcp;
-
-	for(uint_t p = 0; p < K; p++){
 	
-		uint_t ptr;
+	#if OMP
+		#pragma omp parallel for reduction(+:inserts) reduction(+:removes) reduction(+:ov) reduction(+:contained) 
+	#endif
+	for(int_t proc=0; proc < n_threads; proc++){
 
-		//LOCAL solution:
-		uint_t previous =(p>0? Block[p-1]: K+1);
-		uint_t prefix = str_int[(sa[Block[p]]+n-1)%n];
+		uint_t start = proc*(K/n_threads);
+		uint_t end = (proc+1)*(K/n_threads)-1;
+		if(proc==n_threads-1) end = K-1;
 
-		min_lcp = Min_lcp[p];
-		
-		//removes non-valid overlaps
-		while(LIST[pos].lcp > min_lcp){
-			pos++;
-			removes++;
+		uint_t partition = end-start+1;
+
+		#pragma omp critical
+		cout<<"thread_"<<proc<<"\t"<<start<<"\t"<<end<<"\tsize = "<<partition<<endl;
+
+
+		uint_t *TOP_l = (uint_t*) malloc(partition*sizeof(uint_t));
+		uint_t *TOP_g = (uint_t*) malloc(partition*sizeof(uint_t));
+		uint_t *LAST = (uint_t*) malloc(partition*sizeof(uint_t));
+	
+		uint_t *Overlaps = (uint_t*) malloc(K*sizeof(uint_t));
+		uint_t *Min_lcp = (uint_t*) malloc(K*sizeof(uint_t));
+	
+		for(uint_t p = 0; p < partition; p++){
+			TOP_l[p] = TOP_g[p] = UINT_MAX;
+			LAST[p]=0;
 		}
 
-		//updates TOP_g and LAST
-		for(uint_t t = 0; t < K; t++){
-		
-			while(TOP_g[t]<pos) TOP_g[t] = LIST[TOP_g[t]].next;
-			LAST[t] = 0;
-			TOP_l[t] = UINT_MAX;
+		for(uint_t p = 0; p < K; p++){
+			Min_lcp[p]=Overlaps[p]=0;
 		}
 
-		pos -= Overlaps[p];//we know the number of local overlaps
-		ptr = pos;
 
-		//find the local overlaps
-		min_lcp = UINT_MAX;
-		for(uint_t i=Block[p]-1; i>=previous; --i){
+		//We preprocess to find the number of overlaps
+		uint_t overlaps = 0;
+		for(uint_t p = 0; p < K; p++){//all threads scan all SA
 
-			if(min_lcp >= lcp[i+1]){
+			//LOCAL solution:
+			uint_t previous =(p>0? Block[p-1]: K+1);
+			uint_t min_lcp = UINT_MAX;
+			for(uint_t i=Block[p]-1; i>=previous; --i){
+				if(min_lcp >= lcp[i+1]){
 
-				min_lcp = lcp[i+1];
-				//access T[SA[i]+LCP[i+1]]
-				uint_t t = str_int[sa[i]+lcp[i+1]]-1;//current suffix     
+					min_lcp = lcp[i+1];
+					uint_t t = str_int[sa[i]+lcp[i+1]]-1;//current suffix     
 
-				if(t < K)//complete overlap
-				if(min_lcp >= threshold){
-
-					INSERT(LIST, ptr++, t, lcp[i+1], TOP_l, TOP_g, LAST);
-					inserts++;
-				}
-        		}
-		}
-
-		//GLOBAL solution (reusing)	
-		for(uint_t t = 0; t < K; t++){
-
-			if(TOP_l[t]!=UINT_MAX) TOP_g[t] = TOP_l[t];//merge local and global
-					
-			if(TOP_g[t]!=UINT_MAX){
-				#if SAVE_SPACE
-					if(t!=prefix)
-				#endif
-				#if RESULT
-					result[t][prefix] = LIST[TOP_g[t]].lcp;
-				#else
-					result[prefix][t] = LIST[TOP_g[t]].lcp; //major-row
-				#endif
-				ov++;
+					if(t>=start && t<=end)//if the suffix belongs to a string charged by this thread
+//					if(t < K)//complete overlap
+					if(min_lcp >= threshold){
+						Overlaps[p]++;
+					}
+        			}
 			}
+			overlaps += Overlaps[p];
+			Min_lcp[p] = min_lcp;
 		}
-
-		//contained suffixes
+		
+		overlaps++;
+		tLIST *LIST = (tLIST*) malloc(overlaps*sizeof(tLIST));
+		uint_t pos=overlaps-1;
 	
-		#if SAVE_SPACE == 0
-			result[p][p] = 0;
-		#endif
+		LIST[pos].lcp = 0;
+		LIST[pos].next = UINT_MAX;
+		uint_t min_lcp;
 	
-		uint_t q = Block[p]+1;
-		//while(lcp[q] == ms[prefix] and ((tt=str_int[sa[q]+[prefix]]-1) < K ) and q < n ){
-		while(str_int[sa[q]+lcp[q]] < K and q < n ){
+		for(uint_t p = 0; p < K; p++){
+		
+			uint_t ptr;
 	
-			if(lcp[q] >= threshold){
+			//LOCAL solution:
+			uint_t previous =(p>0? Block[p-1]: K+1);
+			uint_t prefix = str_int[(sa[Block[p]]+n-1)%n];
+	
+			min_lcp = Min_lcp[p];
 			
-				uint_t tt=str_int[sa[q]+lcp[q]]-1;
-				contained++;
-	
-				#if RESULT 
-					result[tt][prefix] = lcp[q];
-				#else
-					result[prefix][tt] = lcp[q];
-				#endif
+			//removes non-valid overlaps
+			while(LIST[pos].lcp > min_lcp){
+				pos++;
+				removes++;
 			}
-			else 
-				break;
-			q++;
-		}
-	}
 	
+			//updates TOP_g and LAST
+			for(uint_t t = 0; t < partition; t++){
+			
+				while(TOP_g[t]<pos) TOP_g[t] = LIST[TOP_g[t]].next;
+				LAST[t] = 0;
+				TOP_l[t] = UINT_MAX;
+			}
+	
+			pos -= Overlaps[p];//we know the number of local overlaps
+			ptr = pos;
+	
+			//find the local overlaps
+			min_lcp = UINT_MAX;
+			for(uint_t i=Block[p]-1; i>=previous; --i){
+	
+				if(min_lcp >= lcp[i+1]){
+	
+					min_lcp = lcp[i+1];
+					//access T[SA[i]+LCP[i+1]]
+					uint_t t = str_int[sa[i]+lcp[i+1]]-1;//current suffix     
+	
+					if(t>=start && t<=end)//if the suffix belongs to a string charged by this thread
+	//				if(t < K)//complete overlap
+					if(min_lcp >= threshold){
+	
+						INSERT(LIST, ptr++, t-start, lcp[i+1], TOP_l, TOP_g, LAST);
+						inserts++;
+					}
+	        		}
+			}
+			//GLOBAL solution (reusing)	
+			for(uint_t t = 0; t < partition; t++){
+	
+				if(TOP_l[t]!=UINT_MAX) TOP_g[t] = TOP_l[t];//merge local and global
+						
+				if(TOP_g[t]!=UINT_MAX){
+					#if SAVE_SPACE
+						if(t+start!=prefix)
+					#endif
+					#if RESULT
+						result[t+start][prefix] = LIST[TOP_g[t]].lcp;
+					#else
+						result[prefix][t+start] = LIST[TOP_g[t]].lcp; //major-row
+					#endif
+					ov++;
+				}
+			}
+
+			#if SAVE_SPACE == 0
+				result[p][p] = 0;
+			#endif
+			//contained suffixes
+			uint_t q = Block[p]+1;
+			//while(lcp[q] == ms[prefix] and ((tt=str_int[sa[q]+[prefix]]-1) < K ) and q < n ){
+			while(str_int[sa[q]+lcp[q]] < K and q < n ){
+		
+				if(lcp[q] >= threshold){
+				
+					uint_t tt=str_int[sa[q]+lcp[q]]-1;
+
+					if(tt>=start && tt<=end){//if the suffix belongs to a string charged by this thread
+						contained++;
+						#if RESULT 
+							result[tt][prefix] = lcp[q];
+						#else
+							result[prefix][tt] = lcp[q];
+						#endif
+					}
+				}
+				else 
+					break;
+				q++;
+			}
+
+		}
+		free(TOP_l);free(TOP_g);free(LAST);free(LIST);free(Overlaps);free(Min_lcp);
+	}	
 
 	#if OMP
 		cout<<"## TOTAL"<<endl;
@@ -402,7 +409,6 @@ int main(int argc, char *argv[]){
 
 	delete[] Block;
 
-	free(TOP_l);free(TOP_g);free(LAST);free(LIST);
 
 	return 0;
 }
