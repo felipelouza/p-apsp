@@ -1,6 +1,7 @@
 # ignore objects and archives, anywhere in the tree.
 *.[oa]
 p-apsp
+new_alg
 apsp_tustumi
 suffix_array_solution_prac
 Apsp

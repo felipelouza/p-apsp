@@ -1,8 +1,8 @@
 /*
 * Felipe A. Louza
-* 06 abr 2016
+* 12 dec 2016
 *
-* New (parallel) algorithm to solve the apsp problem
+* New^2 (parallel) algorithm to solve the apsp problem
 */
 
 #include <sdsl/construct.hpp>
@@ -46,7 +46,7 @@ double start, total;
 
 int main(int argc, char *argv[]){
 
-	uint_t k = 0;
+	uint_t K = 0;
 	uint_t n = 0;
 	uint_t l = 0;
 
@@ -58,13 +58,13 @@ int main(int argc, char *argv[]){
 	char* c_dir = argv[1];//dir
 	char* c_file = argv[2];//file
 
-    	sscanf(argv[3], "%" PRIdN "", &k);//number of strings
+    	sscanf(argv[3], "%" PRIdN "", &K);//number of strings
 
 	//load the strings
 	file_chdir(c_dir);
-	unsigned char **R = (unsigned char**) file_load_multiple(c_file, k, &n);
+	unsigned char **R = (unsigned char**) file_load_multiple(c_file, K, &n);
 	if(!R){
-		fprintf(stderr, "Error: less than %" PRIdN " strings in %s\n", k, c_file);
+		fprintf(stderr, "Error: less than %" PRIdN " strings in %s\n", K, c_file);
 		return 0;
 	}
 
@@ -72,18 +72,18 @@ int main(int argc, char *argv[]){
 	int_vector<> str_int(n);
 	//vector<uint_t> ms;  // vector containing the length of the ests
 
-	for(uint_t i=0; i<k; i++){
+	for(uint_t i=0; i<K; i++){
 		uint_t m = strlen((char*)R[i]);
 		//ms.push_back(m);
 		for(uint_t j=0; j<m; j++)
-			str_int[l++] = R[i][j]+(k+1)-'A';
+			str_int[l++] = R[i][j]+(K+1)-'A';
 		str_int[l++] = i+1; //add $_i as separator
 	}	
 	str_int[l]=0;
 
 	
 	//free memory
-	for(uint_t i=0; i<k; i++)
+	for(uint_t i=0; i<K; i++)
 		free(R[i]);
 	free(R);
 
@@ -98,10 +98,8 @@ int main(int argc, char *argv[]){
 
 	int_t n_threads;
 	sscanf(argv[6], "%" PRIdN "", &n_threads);
-	printf("K: %" PRIdN "\n", k);
+	printf("K: %" PRIdN "\n", K);
 	
-n_threads = 1;
-
 	#if OMP
 		omp_set_num_threads(n_threads);
 	
@@ -113,7 +111,7 @@ n_threads = 1;
 		printf("N_PROCS: %d\n", omp_get_num_procs());
 	#endif
 
-	cout<<"length of all strings N = "<<n<<endl; //" Number of strings k="<<k<<endl;
+	cout<<"length of all strings N = "<<n<<endl; //" Number of strings K="<<K<<endl;
 	printf("sizeof(int): %zu bytes\n", sizeof(int_t));
 
 	#if SAVE_SPACE
@@ -123,7 +121,7 @@ n_threads = 1;
  	string dir = "sdsl";
 	mkdir(dir.c_str());
     	string id = c_file;
-	id += "."+to_string(k);
+	id += "."+to_string(K);
     	cache_config m_config(true, dir, id);
 
 	store_to_cache(str_int, conf::KEY_TEXT_INT, m_config);
@@ -151,43 +149,56 @@ n_threads = 1;
 		#endif
 	}
 
-	/**/
+	/********/
 
-    	uint_t *Block =  new uint_t[k];
-    	uint_t *Prefix = new uint_t[k];
+    	uint_t *Block =  new uint_t[K];
 
-	//Find initial position of each Block b_i
+	//Find position of each Block b_i
 	size_t tmp=0; 
 	for(size_t i=0;i<sa.size();++i){
 
 		uint_t t = str_int[(sa[i]+n-1)%n];	
-		if( t < k ){// found whole string as suffix
-			Block[tmp] = i;
-			Prefix[tmp] = t;
-			tmp++;
+		if( t < K ){// found whole string as suffix
+			Block[tmp++] = i;
 		}
 	}
 
-	uint_t *TOP_l = (uint_t*) malloc(k*sizeof(uint_t));
-	uint_t *TOP_g = (uint_t*) malloc(k*sizeof(uint_t));
-	uint_t *LAST = (uint_t*) malloc(k*sizeof(uint_t));
+	int_t partition = (K/n_threads);
+	#if OMP
+		#pragma omp parallel for 
+	#endif
+	for(int_t proc=0; proc < n_threads; proc++){
 
-	uint_t *Overlaps = (uint_t*) malloc(k*sizeof(uint_t));
-	uint_t *Min_lcp = (uint_t*) malloc(k*sizeof(uint_t));
+		uint_t start = proc*partition;
+		uint_t end = (proc+1)*partition-1;
+		if(proc==n_threads-1) end = K-1;
 
-	for(uint_t p = 0; p < k; p++){
+		#pragma omp critical
+		cout<<"thread_"<<proc<<"\t"<<start<<"\t"<<end<<endl;
+
+	}
+
+
+	uint_t *TOP_l = (uint_t*) malloc(K*sizeof(uint_t));
+	uint_t *TOP_g = (uint_t*) malloc(K*sizeof(uint_t));
+	uint_t *LAST = (uint_t*) malloc(K*sizeof(uint_t));
+
+	uint_t *Overlaps = (uint_t*) malloc(K*sizeof(uint_t));
+	uint_t *Min_lcp = (uint_t*) malloc(K*sizeof(uint_t));
+
+	for(uint_t p = 0; p < K; p++){
 		TOP_l[p] = TOP_g[p] = UINT_MAX;
 		LAST[p]=Overlaps[p]=0;
 	}
 
 
 	#if SAVE_SPACE
-		tVMII result(k);//(k, tVI(k,0));
+		tVMII result(K);//(K, tVI(K,0));
 	#else
-		uint_t** result = new uint_t* [k];
-		for(unsigned i=0; i<k; ++i){
-			result[i] = new uint_t [k];
-			for(unsigned j=0; j<k; ++j)
+		uint_t** result = new uint_t* [K];
+		for(unsigned i=0; i<K; ++i){
+			result[i] = new uint_t [K];
+			for(unsigned j=0; j<K; ++j)
 				result[i][j] = 0;
 		}
 	#endif
@@ -202,9 +213,9 @@ n_threads = 1;
 	//FELIPE: preprocess to find the number of overlaps
 	uint_t overlaps = 0;
 
-	for(uint_t p = 0; p < k; p++){
+	for(uint_t p = 0; p < K; p++){
 		//LOCAL solution:
-		uint_t previous =(p>0? Block[p-1]: k+1);
+		uint_t previous =(p>0? Block[p-1]: K+1);
 		uint_t min_lcp = UINT_MAX;
 		for(uint_t i=Block[p]-1; i>=previous; --i){
 			if(min_lcp >= lcp[i+1]){
@@ -212,7 +223,7 @@ n_threads = 1;
 				min_lcp = lcp[i+1];
 				uint_t t = str_int[sa[i]+lcp[i+1]]-1;//current suffix     
 
-				if(t < k)//complete overlap
+				if(t < K)//complete overlap
 				if(min_lcp >= threshold){
 					Overlaps[p]++;
 				}
@@ -234,35 +245,14 @@ n_threads = 1;
 
 	uint_t min_lcp;
 
-	#if OMP
-		#pragma omp parallel for reduction(+:inserts)
-	#endif
-	for(uint_t p = 0; p < k; p++){
+	for(uint_t p = 0; p < K; p++){
 	
 		uint_t ptr;
 
 		//LOCAL solution:
-		uint_t previous =(p>0? Block[p-1]: k+1);
+		uint_t previous =(p>0? Block[p-1]: K+1);
 		uint_t prefix = str_int[(sa[Block[p]]+n-1)%n];
 
-		//First, count the number of local overlaps
-/*
-		min_lcp = UINT_MAX;
-		for(uint_t i=Block[p]-1; i>=previous; --i){
-
-			if(min_lcp >= lcp[i+1]){
-
-				min_lcp = lcp[i+1];
-				uint_t t = str_int[sa[i]+lcp[i+1]]-1;//current suffix     
-
-				if(t < k)//complete overlap
-				if(min_lcp >= threshold){
-					local_overlaps++;
-					last_overlap=i;
-				}
-        		}
-		}
-*/
 		min_lcp = Min_lcp[p];
 		
 		//removes non-valid overlaps
@@ -272,26 +262,15 @@ n_threads = 1;
 		}
 
 		//updates TOP_g and LAST
-		for(uint_t t = 0; t < k; t++){
+		for(uint_t t = 0; t < K; t++){
 		
 			while(TOP_g[t]<pos) TOP_g[t] = LIST[TOP_g[t]].next;
 			LAST[t] = 0;
 			TOP_l[t] = UINT_MAX;
 		}
 
-
-//		pos -= local_overlaps;
-		pos -= Overlaps[p];
+		pos -= Overlaps[p];//we know the number of local overlaps
 		ptr = pos;
-
-//if(local_overlaps){
-//for(uint_t i=pos;i<overlaps;i++)
-//cout<<"<"<<LIST[i].lcp<<", "<<LIST[i].next<<">\t";
-//cout<<endl;
-//}
-
-//if(local_overlaps) cout<<local_overlaps<<"\t"<<pos<<endl;
-
 
 		//find the local overlaps
 		min_lcp = UINT_MAX;
@@ -303,7 +282,7 @@ n_threads = 1;
 				//access T[SA[i]+LCP[i+1]]
 				uint_t t = str_int[sa[i]+lcp[i+1]]-1;//current suffix     
 
-				if(t < k)//complete overlap
+				if(t < K)//complete overlap
 				if(min_lcp >= threshold){
 
 					INSERT(LIST, ptr++, t, lcp[i+1], TOP_l, TOP_g, LAST);
@@ -313,7 +292,7 @@ n_threads = 1;
 		}
 
 		//GLOBAL solution (reusing)	
-		for(uint_t t = 0; t < k; t++){
+		for(uint_t t = 0; t < K; t++){
 
 			if(TOP_l[t]!=UINT_MAX) TOP_g[t] = TOP_l[t];//merge local and global
 					
@@ -337,8 +316,8 @@ n_threads = 1;
 		#endif
 	
 		uint_t q = Block[p]+1;
-		//while(lcp[q] == ms[prefix] and ((tt=str_int[sa[q]+[prefix]]-1) < k ) and q < n ){
-		while(str_int[sa[q]+lcp[q]] < k and q < n ){
+		//while(lcp[q] == ms[prefix] and ((tt=str_int[sa[q]+[prefix]]-1) < K ) and q < n ){
+		while(str_int[sa[q]+lcp[q]] < K and q < n ){
 	
 			if(lcp[q] >= threshold){
 			
@@ -400,8 +379,8 @@ n_threads = 1;
 	#else
 
 		#if DEBUG
-		for(uint_t i=0; i<10 && i<k; ++i){
-			for(uint_t j=0; j<10 && j<k; ++j)
+		for(uint_t i=0; i<10 && i<K; ++i){
+			for(uint_t j=0; j<10 && j<K; ++j)
 				cout<<result[i][j]<<" ";
 			cout<<endl;
 		}
@@ -409,22 +388,19 @@ n_threads = 1;
 
 		if(output==1){
 			ofstream out_file(dir+"/output."+id+".new.bin",ios::out | ios::binary);			
-			for(uint_t i=0; i<k; ++i)
-				for(uint_t j=0; j<k; ++j)
+			for(uint_t i=0; i<K; ++i)
+				for(uint_t j=0; j<K; ++j)
 					out_file.write((char*)&result[i][j], sizeof(uint_t));
 			out_file.close();
 		}
 
-		for(uint_t i=0; i<k; ++i)
+		for(uint_t i=0; i<K; ++i)
 			delete[] result[i];
 		delete[] result;
 
 	#endif
 
 	delete[] Block;
-	delete[] Prefix;
-
-
 
 	free(TOP_l);free(TOP_g);free(LAST);free(LIST);
 
