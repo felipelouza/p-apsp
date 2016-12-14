@@ -407,10 +407,13 @@ inline void insert(tML& Llocal, tMLL& Next,int_t p, int_t value){
 }
 
 inline void remove(Tl **list){
-    
-	Tl *aux = *list;
-	*list = (*list)->prox;
-	delete aux;
+
+	#pragma omp critical
+	{
+		Tl *aux = *list;
+		*list = (*list)->prox;
+		delete aux;
+	}
 }
 
 inline void prepend(Tl **Lg, tMLL& Next, tML& Llocal, int_t p){
