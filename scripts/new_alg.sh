@@ -13,7 +13,7 @@ T=(1 2 4 8 16 32 64 128)
 
 host="jau"
 dir="/mnt/data/bio/projects/gpt/"
-exp="p-new_alg"
+exp="new_alg"
 out="0"
 
 #######################################################################
@@ -49,7 +49,7 @@ do
                                 date >> tests/${test}/${L[$l]}/${host}.db.${A[$a]}.${exp}.txt
 
                                 echo " " >> tests/${test}/${L[$l]}/${host}.db.${A[$a]}.${exp}.txt
-                                make run DIR=${dir} INPUT=${D[$d]}${ext[$d]} K=${A[$a]} OUTPUT=${out} L=${L[$l]} T=${T[$t]} >> tests/${test}/${L[$l]}/${host}.db.${A[$a]}.${exp}.txt
+                                make run_new DIR=${dir} INPUT=${D[$d]}${ext[$d]} K=${A[$a]} OUTPUT=${out} L=${L[$l]} T=${T[$t]} >> tests/${test}/${L[$l]}/${host}.db.${A[$a]}.${exp}.txt
                         done
                 done
 
