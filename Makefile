@@ -29,7 +29,8 @@ OUTPUT = 0
 T = 8 # n_threads
 ####
 
-all: p-apsp new_alg
+all: p-apsp 
+#new_alg
 #apsp_tustumi
 #suffix_array_solution_prac
 
@@ -39,8 +40,8 @@ suffix_array_solution_prac: external/suffix_array_solution_prac.cpp ${LIBOBJ}
 lib: lib/file.o 
 	$(MY_CXX) -c lib/file.c -o lib/file.o 
 
-new_alg: lib new_alg.cpp ${LIBOBJ}
-	$(MY_CXX) $(CXX_FLAGS) new_alg.cpp $(CCLIB) -o new_alg ${LIBOBJ} 
+new_alg: lib tmp/new_alg.cpp ${LIBOBJ}
+	$(MY_CXX) $(CXX_FLAGS) tmp/new_alg.cpp $(CCLIB) -o tmp/new_alg ${LIBOBJ} 
 
 p-apsp: lib main.cpp ${LIBOBJ}
 	$(MY_CXX) $(CXX_FLAGS) main.cpp $(CCLIB) -o p-apsp ${LIBOBJ} 
@@ -55,13 +56,13 @@ clean:
 	rm external/suffix_array_solution_prac -f
 	rm external/malloc_count/malloc_count.o -f
 	rm p-apsp -f
-	rm new_alg -f
+	rm tmp/new_alg -f
 	rm external/apsp_tustumi -f
 	rm *.bin -f
 	rm lib/*.o -f
 	rm *.sdsl -f
 
-run: run_main run_new
+run: run_main 
 
 run_suff: 
 	external/suffix_array_solution_prac $(DIR) $(INPUT) $(K) $(L) $(OUTPUT)
@@ -70,7 +71,7 @@ run_main:
 	./p-apsp $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
 	
 run_new: 
-	./new_alg $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
+	tmp/new_alg $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
 	
 run_tustumi: 
 	external/apsp_tustumi $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
@@ -79,7 +80,8 @@ run_strip:
 	utils/strip $(INPUT) $(K)
 	
 valgrind: 
-	valgrind --tool=memcheck --leak-check=full --track-origins=yes ./p-apsp $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
+#	valgrind --tool=memcheck --leak-check=full --track-origins=yes ./p-apsp $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
+	valgrind --tool=memcheck --leak-check=full --track-origins=yes ./new_alg $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
 
 valgrind_new:
 	valgrind --tool=memcheck --leak-check=full --track-origins=yes ./new_alg $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)

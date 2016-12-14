@@ -11,9 +11,9 @@
 #include <sdsl/construct_config.hpp>
 #include <iostream>
 #include <climits>
-#include "lib/file.h"
-#include "lib/utils.h"
-#include "external/malloc_count/malloc_count.h"
+#include "../lib/file.h"
+#include "../lib/utils.h"
+#include "../external/malloc_count/malloc_count.h"
 //#include <sdsl/bit_vectors.hpp>
 
 #include <omp.h>
@@ -23,7 +23,7 @@
 #define OMP 1
 
 //output format [row, column]
-#define RESULT 1 // 0 = [prefix, suffix], 1 = [suffix, prefix]
+#define RESULT 0 // 0 = [prefix, suffix], 1 = [suffix, prefix]
 
 using namespace std;
 using namespace sdsl;
@@ -33,17 +33,12 @@ typedef struct _list{
     uint_t next;
 } tLIST;
 
-typedef struct _tl{    
-    uint_t value;
-    struct _tl *next;
-} Tl;
-
 typedef map<uint_t, uint_t> tMII;
 typedef vector<tMII> tVMII;
 
 inline void INSERT(tLIST* LIST, int_t ptr, int t, int lcp, uint_t *TOP_l,  uint_t *TOP_g, uint_t* LAST);
 
-double start, total;
+double t_start, t_total;
 
 int main(int argc, char *argv[]){
 
@@ -102,6 +97,8 @@ int main(int argc, char *argv[]){
 	printf("K: %" PRIdN "\n", K);
 	
 	#if OMP
+		if(n_threads>(int_t)K)n_threads=K;	
+
 		omp_set_num_threads(n_threads);
 	
 		#pragma omp parallel
@@ -110,6 +107,8 @@ int main(int argc, char *argv[]){
 			printf("N_THREADS: %d\n", omp_get_num_threads());
 		}
 		printf("N_PROCS: %d\n", omp_get_num_procs());
+	#else
+		n_threads=1;
 	#endif
 
 	cout<<"length of all strings N = "<<n<<endl; //" Number of strings K="<<K<<endl;
@@ -132,21 +131,21 @@ int main(int argc, char *argv[]){
 
 	if(!load_from_cache(sa, conf::KEY_SA, m_config)){
 		#if OMP
-			start = omp_get_wtime();
+			t_start = omp_get_wtime();
 		#endif
 		construct_sa<0>(m_config); load_from_cache(sa, conf::KEY_SA, m_config);
 		#if OMP
-			printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
+			printf("TIME = %f (in seconds)\n", omp_get_wtime()-t_start);
 		#endif
 	}
 
 	if(!load_from_cache(lcp, conf::KEY_LCP, m_config)){
 		#if OMP
-			start = omp_get_wtime();
+			t_start = omp_get_wtime();
 		#endif
 		construct_lcp_PHI<0>(m_config); load_from_cache(lcp, conf::KEY_LCP, m_config);
 		#if OMP
-			printf("TIME = %f (in seconds)\n", omp_get_wtime()-start);
+			printf("TIME = %f (in seconds)\n", omp_get_wtime()-t_start);
 		#endif
 	}
 
@@ -166,8 +165,8 @@ int main(int argc, char *argv[]){
 	cout<<"computing..."<<endl;
 
 	#if OMP
-		total = omp_get_wtime();
-		start = omp_get_wtime();
+		t_total = omp_get_wtime();
+		t_start = omp_get_wtime();
 	#endif
 
     	uint_t *Block =  new uint_t[K];
@@ -184,10 +183,9 @@ int main(int argc, char *argv[]){
 /**/
 	uint_t inserts = 0, removes = 0;
 	uint_t ov=0;
-	uint_t contained=0;
 	
 	#if OMP
-		#pragma omp parallel for reduction(+:inserts) reduction(+:removes) reduction(+:ov) reduction(+:contained) 
+		#pragma omp parallel for schedule(static) reduction(+:inserts) reduction(+:removes) reduction(+:ov) 
 	#endif
 	for(int_t proc=0; proc < n_threads; proc++){
 
@@ -197,17 +195,17 @@ int main(int argc, char *argv[]){
 
 		uint_t partition = end-start+1;
 
+		uint_t *TOP_l, *TOP_g, *LAST, *Overlaps, *Min_lcp;
+	
 		#pragma omp critical
-		cout<<"thread_"<<proc<<"\t"<<start<<"\t"<<end<<"\tsize = "<<partition<<endl;
+		{
+			TOP_l = new uint_t[partition];
+			TOP_g = new uint_t[partition];
+			LAST =  new uint_t[partition];         
+			Overlaps = new uint_t[K];
+			Min_lcp =  new uint_t[K];
+		}
 
-
-		uint_t *TOP_l = (uint_t*) malloc(partition*sizeof(uint_t));
-		uint_t *TOP_g = (uint_t*) malloc(partition*sizeof(uint_t));
-		uint_t *LAST = (uint_t*) malloc(partition*sizeof(uint_t));
-	
-		uint_t *Overlaps = (uint_t*) malloc(K*sizeof(uint_t));
-		uint_t *Min_lcp = (uint_t*) malloc(K*sizeof(uint_t));
-	
 		for(uint_t p = 0; p < partition; p++){
 			TOP_l[p] = TOP_g[p] = UINT_MAX;
 			LAST[p]=0;
@@ -232,7 +230,6 @@ int main(int argc, char *argv[]){
 					uint_t t = str_int[sa[i]+lcp[i+1]]-1;//current suffix     
 
 					if(t>=start && t<=end)//if the suffix belongs to a string charged by this thread
-//					if(t < K)//complete overlap
 					if(min_lcp >= threshold){
 						Overlaps[p]++;
 					}
@@ -241,121 +238,157 @@ int main(int argc, char *argv[]){
 			overlaps += Overlaps[p];
 			Min_lcp[p] = min_lcp;
 		}
-		
-		overlaps++;
-		tLIST *LIST = (tLIST*) malloc(overlaps*sizeof(tLIST));
-		uint_t pos=overlaps-1;
-	
-		LIST[pos].lcp = 0;
-		LIST[pos].next = UINT_MAX;
-		uint_t min_lcp;
-	
-		for(uint_t p = 0; p < K; p++){
-		
-			uint_t ptr;
-	
-			//LOCAL solution:
-			uint_t previous =(p>0? Block[p-1]: K+1);
-			uint_t prefix = str_int[(sa[Block[p]]+n-1)%n];
-	
-			min_lcp = Min_lcp[p];
-			
-			//removes non-valid overlaps
-			while(LIST[pos].lcp > min_lcp){
-				pos++;
-				removes++;
-			}
-	
-			//updates TOP_g and LAST
-			for(uint_t t = 0; t < partition; t++){
-			
-				while(TOP_g[t]<pos) TOP_g[t] = LIST[TOP_g[t]].next;
-				LAST[t] = 0;
-				TOP_l[t] = UINT_MAX;
-			}
-	
-			pos -= Overlaps[p];//we know the number of local overlaps
-			ptr = pos;
-	
-			//find the local overlaps
-			min_lcp = UINT_MAX;
-			for(uint_t i=Block[p]-1; i>=previous; --i){
-	
-				if(min_lcp >= lcp[i+1]){
-	
-					min_lcp = lcp[i+1];
-					//access T[SA[i]+LCP[i+1]]
-					uint_t t = str_int[sa[i]+lcp[i+1]]-1;//current suffix     
-	
-					if(t>=start && t<=end)//if the suffix belongs to a string charged by this thread
-	//				if(t < K)//complete overlap
-					if(min_lcp >= threshold){
-	
-						INSERT(LIST, ptr++, t-start, lcp[i+1], TOP_l, TOP_g, LAST);
-						inserts++;
-					}
-	        		}
-			}
-			//GLOBAL solution (reusing)	
-			for(uint_t t = 0; t < partition; t++){
-	
-				if(TOP_l[t]!=UINT_MAX) TOP_g[t] = TOP_l[t];//merge local and global
-						
-				if(TOP_g[t]!=UINT_MAX){
-					#if SAVE_SPACE
-						if(t+start!=prefix)
-					#endif
-					#if RESULT
-						result[t+start][prefix] = LIST[TOP_g[t]].lcp;
-					#else
-						result[prefix][t+start] = LIST[TOP_g[t]].lcp; //major-row
-					#endif
-					ov++;
-				}
-			}
 
-			#if SAVE_SPACE == 0
-				result[p][p] = 0;
-			#endif
-			//contained suffixes
-			uint_t q = Block[p]+1;
-			//while(lcp[q] == ms[prefix] and ((tt=str_int[sa[q]+[prefix]]-1) < K ) and q < n ){
-			while(str_int[sa[q]+lcp[q]] < K and q < n ){
+		#pragma omp critical
+		cout<<"thread_"<<proc<<"\t"<<start<<"\t"<<end<<"\tsize = "<<partition<<"\toverlaps = "<<overlaps<<endl;
 		
-				if(lcp[q] >= threshold){
+		if(overlaps){
+
+			overlaps+=2;//LIST[0] and LIST[pos] are sentinels
+	
+			tLIST *LIST;
+			#pragma omp critical
+			LIST = new tLIST[overlaps];
+
+			uint_t pos=overlaps-1;
+		
+			LIST[pos].lcp = 0;
+			LIST[pos].next = UINT_MAX;
+			uint_t min_lcp;
+		
+			for(uint_t p = 0; p < K; p++){
+			
+				uint_t ptr;
+		
+				//LOCAL solution:
+				uint_t prefix = str_int[(sa[Block[p]]+n-1)%n];
+		
+				min_lcp = Min_lcp[p];
 				
-					uint_t tt=str_int[sa[q]+lcp[q]]-1;
+				//removes non-valid overlaps
+				while(LIST[pos].lcp > min_lcp){
+					pos++;
+					removes++;
+				}
+		
+				//updates TOP_g and LAST
+				for(uint_t t = 0; t < partition; t++){
+				
+					while(TOP_g[t]<pos) TOP_g[t] = LIST[TOP_g[t]].next;
+					LAST[t] = 0;
+					TOP_l[t] = UINT_MAX;
+				}
+		
+				pos -= Overlaps[p];//we know the number of local overlaps
+				ptr = pos;
+	
+				//cout<<"# of overlaps: "<<Overlaps[p]<<endl;
+				if(Overlaps[p]){
+					
+					//find the local overlaps
+					min_lcp = UINT_MAX;
 
-					if(tt>=start && tt<=end){//if the suffix belongs to a string charged by this thread
-						contained++;
-						#if RESULT 
-							result[tt][prefix] = lcp[q];
-						#else
-							result[prefix][tt] = lcp[q];
-						#endif
+					uint_t previous =(p>0? Block[p-1]: K+1);
+					for(uint_t i=Block[p]-1; i>=previous; --i){
+					
+						if(min_lcp >= lcp[i+1]){
+					
+							min_lcp = lcp[i+1];
+							//access T[SA[i]+LCP[i+1]]
+							uint_t t = str_int[sa[i]+lcp[i+1]]-1;//current suffix     
+					
+							if(t>=start && t<=end)//if the suffix belongs to a string charged by this thread
+							if(min_lcp >= threshold){
+					
+								INSERT(LIST, ptr++, t-start, lcp[i+1], TOP_l, TOP_g, LAST);
+								inserts++;
+							}
+						}
 					}
 				}
-				else 
-					break;
-				q++;
+	
+				//GLOBAL solution (reusing)	
+				for(uint_t t = 0; t < partition; t++){
+		
+					if(TOP_l[t]!=UINT_MAX) TOP_g[t] = TOP_l[t];//merge local and global
+							
+					if(TOP_g[t]!=UINT_MAX){
+						#if SAVE_SPACE
+							if(t+start!=prefix)
+						#endif
+						#if RESULT
+							result[t+start][prefix] = LIST[TOP_g[t]].lcp;
+						#else
+							result[prefix][t+start] = LIST[TOP_g[t]].lcp; //major-row
+						#endif
+						ov++;
+					}
+				}
 			}
 
+			delete[] LIST;   
 		}
-		free(TOP_l);free(TOP_g);free(LAST);free(LIST);free(Overlaps);free(Min_lcp);
+		
+		delete[] TOP_l;   
+		delete[] TOP_g;   
+		delete[] LAST;    
+		delete[] Overlaps;
+		delete[] Min_lcp; 
 	}	
 
+
 	#if OMP
+		cout<<"--"<<endl;
+		printf("TIME = %f (in seconds)\n", omp_get_wtime()-t_start);
+		t_start = omp_get_wtime();
+	#endif	
+
+	uint_t contained=0;
+	//contained suffixes
+	#if OMP
+		#pragma omp parallel for reduction(+:contained) //firstprivate(threshold,n,K) 
+	#endif
+	for(uint_t p = 0; p < K; p++){
+
+		#if SAVE_SPACE == 0
+			result[p][p] = 0;
+		#endif
+		uint_t prefix = str_int[(sa[Block[p]]+n-1)%n];
+		uint_t q = Block[p]+1;
+		//while(lcp[q] == ms[prefix] and ((tt=str_int[sa[q]+[prefix]]-1) < K ) and q < n ){
+		while(str_int[sa[q]+lcp[q]] < K and q < n ){
+	
+			if(lcp[q] >= threshold){
+			
+				uint_t tt=str_int[sa[q]+lcp[q]]-1;
+				contained++;
+				#if RESULT 
+					result[tt][prefix] = lcp[q];
+				#else
+					result[prefix][tt] = lcp[q];
+				#endif
+			}
+			else 
+				break;
+			q++;
+		}
+	}
+
+	#if OMP
+		cout<<"--"<<endl;
+		printf("TIME = %f (in seconds)\n", omp_get_wtime()-t_start);
+
 		cout<<"## TOTAL"<<endl;
-		printf("TIME = %f (in seconds)\n", omp_get_wtime()-total);
+		printf("TIME = %f (in seconds)\n", omp_get_wtime()-t_total);
 		cout<<"##"<<endl;
 
-		fprintf(stderr, "%lf\n", omp_get_wtime()-total);
+		fprintf(stderr, "%lf\n", omp_get_wtime()-t_total);
 	#endif
 
 	cout<<"--"<<endl;
    	printf("inserts %" PRIdN "\n", inserts);
 	printf("removes %" PRIdN "\n", removes);
-        printf("overlaps %" PRIdN " (%" PRIdN ")\n", ov, contained);
+        printf("overlaps %" PRIdN " (%" PRIdN ")\t[%.5lf%%]\n", ov, contained, (ov+contained)/(pow(K,2))*100.0);
 	cout<<"--"<<endl;
 
 

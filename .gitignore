@@ -8,7 +8,6 @@ Apsp
 gen
 converter
 strip
-tmp/
 utils_32.h
 utils_64.h
 *.swp
