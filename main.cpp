@@ -256,14 +256,17 @@ int main(int argc, char *argv[]){
 	
 			if(Lg){
 			#if SAVE_SPACE
-				if(t!=Prefix[p])
+				if(t!=Prefix[p]){
 			#endif
-			#if RESULT
-				result[t][Prefix[p]] = Lg->value;
-			#else
-				result[Prefix[p]][t] = Lg->value;
+				#if RESULT
+					result[t][Prefix[p]] = Lg->value;
+				#else
+					result[Prefix[p]][t] = Lg->value;
+				#endif
+			#if SAVE_SPACE
+					overlaps++;
+				}	
 			#endif
-				overlaps++;
 			}
 	
 		}
