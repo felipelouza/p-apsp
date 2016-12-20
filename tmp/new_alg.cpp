@@ -11,9 +11,9 @@
 #include <sdsl/construct_config.hpp>
 #include <iostream>
 #include <climits>
-#include "lib/utils.h"
-#include "lib/file.h"
-#include "external/malloc_count/malloc_count.h"
+#include "../lib/utils.h"
+#include "../lib/file.h"
+#include "../external/malloc_count/malloc_count.h"
 #include <sdsl/bit_vectors.hpp>
 
 #include <omp.h>
@@ -361,17 +361,18 @@ int a=0;
 		return 0;
 	#endif
 
+	//TO DO: change it for omp_lock
 	#pragma omp critical
 	{
 		#if RESULT
-	//	if(result[t][p]==0) a=1;
+		if(result[t][p]==0) a=1;
 	
 		if(result[t][p]<value){
 	
 			result[t][p] = value;
 		}
 		#else
-	//	if(result[p][t]==0) a=1;
+		if(result[p][t]==0) a=1;
 	
 		if(result[p][t]<value){
 	
