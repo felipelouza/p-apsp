@@ -29,8 +29,7 @@ OUTPUT = 0
 T = 8 # n_threads
 ####
 
-all: p-apsp 
-#new_alg
+all: p-apsp new_alg
 #apsp_tustumi
 #suffix_array_solution_prac
 
@@ -62,7 +61,7 @@ clean:
 	rm lib/*.o -f
 	rm *.sdsl -f
 
-run: run_main 
+run: run_main run_new 
 
 run_suff: 
 	external/suffix_array_solution_prac $(DIR) $(INPUT) $(K) $(L) $(OUTPUT)

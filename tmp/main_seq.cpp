@@ -1,8 +1,8 @@
 /*
 * Felipe A. Louza
-* 06 abr 2016
+* 10 dez 2016
 *
-* New (parallel) algorithm to solve the apsp problem
+* Sequential version of the new (parallel) algorithm to solve the apsp problem
 */
 
 #include <sdsl/construct.hpp>

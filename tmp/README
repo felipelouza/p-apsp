@@ -1,0 +1,17 @@
+##
+12-10:
+main_seq.cpp: sequential version of SPIRE's algorithm
+
+12-11:
+main_static.cpp: parallel version using static lists
+
+12-12:
+main_static_seq.cpp: sequential version with static lists
+
+##
+New algorithm (non-optimal):
+
+12-15
+new_alg_1.cpp: lock with #pragma omp critical 
+
+

@@ -22,8 +22,6 @@
 #define SAVE_SPACE 1
 #define OMP 1
 
-#define BITVECTOR 1
-
 //output format [row, column]
 #define RESULT 1 // 0 = [prefix, suffix], 1 = [suffix, prefix]
 
@@ -144,14 +142,6 @@ int main(int argc, char *argv[]){
 		#endif
 	}
 
-/**/
-	omp_lock_t lock[k];
-
-	for (uint_t i=0; i<k; i++)
-	        omp_init_lock(&(lock[i]));
-/**/
-
-
     	uint_t *Block =  new uint_t[k];
     	uint_t *Prefix = new uint_t[k];
 
@@ -226,8 +216,8 @@ int main(int argc, char *argv[]){
 
 	//GLOBAL solution 
 	uint_t overlaps=0;
-		#if OMP
-			#pragma omp parallel for shared(lock) reduction(+:overlaps)
+	#if OMP
+		#pragma omp parallel for reduction(+:overlaps)
 	#endif
 	for(uint_t p = 0; p < k; p++){
 
@@ -238,9 +228,6 @@ int main(int argc, char *argv[]){
 
 				uint_t t = str_int[sa[i]+lcp[i+1]]-1;//current suffix     
 
-				//FELIPE
-//				omp_set_lock(&(lock[t]));
-
 				//FELIPE: we don't have to check if result[][] is larger
 				overlaps += add_overlap(result, t, Prefix[p], lcp[i+1]);//Local overlap
 
@@ -249,8 +236,7 @@ int main(int argc, char *argv[]){
 					overlaps += add_overlap(result, t, Prefix[next], lcp[i+1]);
 					next++;
 				}
-
-//			        omp_unset_lock(&(lock[t]));			
+			
         		}
 		}
 	}
@@ -360,12 +346,6 @@ int main(int argc, char *argv[]){
 
 	#endif
 
-
-/**/
-	for (uint_t i=0; i<k; i++)
-        	omp_destroy_lock(&(lock[i]));
-/**/
-
 	delete[] Block;
 	delete[] Prefix;
 	delete[] Min_lcp;
@@ -384,7 +364,7 @@ int a=0;
 	#endif
 
 	//FELIPE: change it for omp_lock
-//	#pragma omp critical
+	#pragma omp critical
 	{
 		#if RESULT
 		if(result[t][p]==0) a=1;
