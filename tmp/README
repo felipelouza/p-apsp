@@ -14,4 +14,8 @@ New algorithm (non-optimal):
 12-15
 new_alg_1.cpp: lock with #pragma omp critical 
 
+01-11
+new_alg_2.cpp: lock with: omp_lock_t lock[k]; 
+
+
 

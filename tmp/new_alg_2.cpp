@@ -239,7 +239,7 @@ int main(int argc, char *argv[]){
 				uint_t t = str_int[sa[i]+lcp[i+1]]-1;//current suffix     
 
 				//FELIPE
-//				omp_set_lock(&(lock[t]));
+				omp_set_lock(&(lock[t]));
 
 				//FELIPE: we don't have to check if result[][] is larger
 				overlaps += add_overlap(result, t, Prefix[p], lcp[i+1]);//Local overlap
@@ -250,7 +250,7 @@ int main(int argc, char *argv[]){
 					next++;
 				}
 
-//			        omp_unset_lock(&(lock[t]));			
+			        omp_unset_lock(&(lock[t]));			
         		}
 		}
 	}
