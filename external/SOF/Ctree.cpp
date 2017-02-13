@@ -502,6 +502,7 @@ void distribute_k_2(int threads,int start_p[],int end_p[],uchar *T,ulong startpo
   omp_set_num_threads(threads);
 #pragma omp parallel 
   {
+long int total=0;
     int pid= omp_get_thread_num();
     for(uint i=start_p[pid];i<=end_p[pid];i++){
       uint j=startpos[i];
@@ -511,7 +512,7 @@ void distribute_k_2(int threads,int start_p[],int end_p[],uchar *T,ulong startpo
 		int v=j;struct tree_node *curptr=ptr;int pos=1;int curpos=0;
 		while (1){
 			  if (v==next){  // There is a match
-				do_output_all_results(A,result, sorted,i,next-j,curptr,output,startpos);
+				total += do_output_all_results(A,result, sorted,i,next-j,curptr,output,startpos);
 				break;
 			  }
 
@@ -531,6 +532,7 @@ void distribute_k_2(int threads,int start_p[],int end_p[],uchar *T,ulong startpo
 	    j++;
      }
    }
+fprintf(stdout, "overlaps = %llu\n", total);
  }
 
 }
@@ -541,8 +543,9 @@ void distribute_k_2(int threads,int start_p[],int end_p[],uchar *T,ulong startpo
 void distribute_k_1(int threads,uchar *T,ulong startpos[],uint sorted[],int **A, tVMII& result,struct  tree_node* ptr,ulong k,ulong N,int output,int min)
 {
   omp_set_num_threads(threads);
-  
-#pragma omp parallel for 
+
+long int total=0;  
+#pragma omp parallel for reduction(+:total)
   for(ulong i=0;i<k;i++){
     ulong j=startpos[i];
     ulong next=startpos[i+1];
@@ -551,7 +554,7 @@ void distribute_k_1(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
       ulong v=j;struct tree_node *curptr=ptr;ulong pos=1;ulong curpos=0;
       while (1){
 		if (/*T[v]==SEPERATOR*/ v==next){  // There is a match
-		  do_output_all_results(A,result,sorted,i,next-j,curptr,output,startpos);
+		  total += do_output_all_results(A,result,sorted,i,next-j,curptr,output,startpos);
 		  break;
 	    }
 
@@ -571,6 +574,7 @@ void distribute_k_1(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
       j++;
     }
   }
+fprintf(stdout, "overlaps = %llu\n", total);
 }
 
 
@@ -582,7 +586,9 @@ void distribute_k_3(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
   omp_set_num_threads(threads);
   int start=-1 * INIT_SHARE;
   uint end;
-#pragma omp parallel 
+long int total=0;  
+#pragma omp parallel reduction(+:total)
+//#pragma omp parallel 
   { 
 
 
@@ -603,7 +609,7 @@ void distribute_k_3(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
 	  int v=j;struct tree_node *curptr=ptr;int pos=1;int curpos=0;
 	  while (1){
 	    if (v==next){  // There is a match
-	      do_output_all_results(A,result,sorted,i,next-j,curptr,output,startpos);
+	      total += do_output_all_results(A,result,sorted,i,next-j,curptr,output,startpos);
 	      break;
 	    }
 
@@ -627,6 +633,7 @@ void distribute_k_3(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
 
     }
   }
+fprintf(stdout, "overlaps = %llu\n", total);
 
 }
 
@@ -634,6 +641,7 @@ void distribute_seq(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
 {
 
   
+long int total=0;  
 
   for(uint i=0;i<k;i++){
     uint j=startpos[i];
@@ -643,7 +651,7 @@ void distribute_seq(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
       int v=j;struct tree_node *curptr=ptr;int pos=1;int curpos=0;
       while (1){
 	if (v==next){  // There is a match
-	  do_output_all_results(A,result,sorted,i,next-j,curptr,output,startpos);
+	  total += do_output_all_results(A,result,sorted,i,next-j,curptr,output,startpos);
 	  break;
 	}
 
@@ -664,31 +672,40 @@ void distribute_seq(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
     }
   }
 
-
-
-
+fprintf(stdout, "overlaps = %llu\n", total);
 }
 
 
 
 
-void do_output_all_results(int **A, tVMII& result,uint sorted[],int i,int value,struct tree_node *curptr,int output,ulong startpos[]){
-//   if (output==1){
-     for(int z=curptr->from;z<=curptr->to;z++){
+long int do_output_all_results(int **A, tVMII& result,uint sorted[],int i,int value,struct tree_node *curptr,int output,ulong startpos[]){
+int z=0;
+long int total=0;
+   if (output==1){
+     for(z=curptr->from;z<=curptr->to;z++){
 //       if (A[i][sorted[z]]==0 && value<=(startpos[sorted[z]+1]-startpos[sorted[z]]))   /* this will work because if the value is not 0, it will be the maximum suffix prefix match. */
 //			A[i][sorted[z]]= value;
        if (result[i][sorted[z]]==0 && value<=(startpos[sorted[z]+1]-startpos[sorted[z]]))   /* this will work because if the value is not 0, it will be the maximum suffix prefix match. */
 			result[i][sorted[z]]= value;
      }
-//   }
+   }
 // else
    if (output==2){
-     for(int z=curptr->from;z<=curptr->to;z++){
-		if (value>0 && i!=sorted[z] && value<=(startpos[sorted[z]+1]-startpos[sorted[z]]))   
-			printf("%d %d ---> %d\n", i,sorted[z], value);
+     for(z=curptr->from;z<=curptr->to;z++){
+		if (value>0 && i!=sorted[z] && value<=(startpos[sorted[z]+1]-startpos[sorted[z]])){
+			fprintf(stderr, "%d %d ---> %d\n", i,sorted[z], value);
+			total++;
+		}
 	 }
    }
-   
+   if (output==3){//only counts the # of overlaps
+     for(z=curptr->from;z<=curptr->to;z++){
+		if (value>0 && i!=sorted[z] && value<=(startpos[sorted[z]+1]-startpos[sorted[z]])){
+			total++;
+		}
+	 }
+   }
+return total;
 }
 
 char decode(uchar *final,ulong pos){

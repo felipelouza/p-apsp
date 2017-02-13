@@ -59,6 +59,6 @@ void distribute_k_1(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
 void distribute_k_3(int threads,uchar *T,ulong startpos[],uint sorted[],int **A, tVMII& result,struct  tree_node* ptr,ulong k,ulong N,int output,int min);
 void distribute_seq(int threads,uchar *T,ulong startpos[],uint sorted[],int **A, tVMII& result,struct  tree_node* ptr,ulong k,ulong N,int output,int min);
 
-void do_output_all_results(int **A, tVMII& result,uint sorted[],int i, int value, struct tree_node *curptr,int output,ulong startpos[]);
+long int do_output_all_results(int **A, tVMII& result,uint sorted[],int i, int value, struct tree_node *curptr,int output,ulong startpos[]);
 char decode(uchar *final,ulong pos);
 #endif

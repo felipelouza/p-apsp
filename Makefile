@@ -77,6 +77,10 @@ run_new:
 run_tustumi: 
 	external/apsp_tustumi $(DIR) $(INPUT) $(K) $(L) $(OUTPUT) $(T)
 
+run_sof: 
+	external/SOF/Apsp external/SOF/test.txt -o $(OUTPUT) -m $(L) -p $(T) -s 0
+#$(DIR)$(INPUT)
+
 run_strip: 
 	utils/strip $(INPUT) $(K)
 	
