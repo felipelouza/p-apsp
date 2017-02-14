@@ -500,9 +500,9 @@ void traversal2(struct tree_node* ptr2,int i2,struct tree_node *ptr1,int i1,ucha
 void distribute_k_2(int threads,int start_p[],int end_p[],uchar *T,ulong startpos[],uint sorted[],int **A, tVMII& result,struct  tree_node* ptr,ulong k,ulong N,int output,int min)
 {
   omp_set_num_threads(threads);
-#pragma omp parallel 
-  {
 long int total=0;
+#pragma omp parallel reduction(+:total) 
+  {
     int pid= omp_get_thread_num();
     for(uint i=start_p[pid];i<=end_p[pid];i++){
       uint j=startpos[i];
@@ -532,9 +532,9 @@ long int total=0;
 	    j++;
      }
    }
-fprintf(stdout, "overlaps = %llu\n", total);
  }
 
+fprintf(stdout, "overlaps = %llu\n", total);
 }
 
 
