@@ -643,12 +643,12 @@ void distribute_seq(int threads,uchar *T,ulong startpos[],uint sorted[],int **A,
   
 long int total=0;  
 
-  for(uint i=0;i<k;i++){
-    uint j=startpos[i];
-    uint next=startpos[i+1];
+  for(ulong i=0;i<k;i++){
+    ulong j=startpos[i];
+    ulong next=startpos[i+1];
 
     while (min<=next-j){	//T[j]!=SEPERATOR
-      int v=j;struct tree_node *curptr=ptr;int pos=1;int curpos=0;
+      ulong v=j;struct tree_node *curptr=ptr;ulong pos=1;ulong curpos=0;
       while (1){
 	if (v==next){  // There is a match
 	  total += do_output_all_results(A,result,sorted,i,next-j,curptr,output,startpos);
