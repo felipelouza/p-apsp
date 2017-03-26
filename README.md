@@ -1,10 +1,10 @@
-#p-apsp
+# p-apsp
 
 This code is an implementation of p-apsp [1], a new (parallel) algorithm based
 on [2] to solve the all-pairs suffix-prefix problem.
 
 
-#run:
+# run
 
 To run a test with K=100 strings from INPUT=dataset/c_elegans_ests_200.fasta, overlap threshold L=10, using T=4 threads type:
 
