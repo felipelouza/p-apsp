@@ -35,19 +35,19 @@ all: p-apsp
 #suffix_array_solution_prac
 
 suffix_array_solution_prac: external/suffix_array_solution_prac.cpp ${LIBOBJ}
-	$(MY_CXX) $(CXX_FLAGS) external/suffix_array_solution_prac.cpp $(CCLIB) -o external/suffix_array_solution_prac  
+	$(MY_CXX) external/suffix_array_solution_prac.cpp $(CCLIB) -o external/suffix_array_solution_prac   $(CXX_FLAGS)
 
 lib: lib/file.o 
 	$(MY_CXX) -c lib/file.c -o lib/file.o 
 
 new_alg: lib tmp/new_alg.cpp ${LIBOBJ}
-	$(MY_CXX) $(CXX_FLAGS) tmp/new_alg.cpp $(CCLIB) -o tmp/new_alg ${LIBOBJ} 
+	$(MY_CXX) tmp/new_alg.cpp $(CCLIB) -o tmp/new_alg ${LIBOBJ} $(CXX_FLAGS) 
 
 p-apsp: lib main.cpp ${LIBOBJ}
-	$(MY_CXX) $(CXX_FLAGS) main.cpp $(CCLIB) -o p-apsp ${LIBOBJ} 
+	$(MY_CXX) main.cpp $(CCLIB) -o p-apsp ${LIBOBJ} $(CXX_FLAGS) 
 
 apsp_tustumi: lib external/apsp_tustumi.cpp
-	$(MY_CXX) $(CXX_FLAGS) external/apsp_tustumi.cpp $(CCLIB) -o external/apsp_tustumi  ${LIBOBJ} 
+	$(MY_CXX) external/apsp_tustumi.cpp $(CCLIB) -o external/apsp_tustumi  ${LIBOBJ} $(CXX_FLAGS) 
 
 strip: utils/strip.cpp
 	$(MY_CXX) utils/strip.cpp -o utils/strip
